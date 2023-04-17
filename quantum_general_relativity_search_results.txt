@@ -1,0 +1,40 @@
+[{
+    "title": "Bridge between quantum mechanics and general relativity still possible",
+    "href": "https://phys.org/news/2019-09-bridge-quantum-mechanics-relativity.html",
+    "body": "An international team of researchers developed a unified framework that would account for this apparent break down between classical and quantum physics, and they put it to the test using a..."
+},
+{
+    "title": "Unifying quantum mechanics with Einstein's general relativity",
+    "href": "https://researchoutreach.org/articles/unifying-quantum-mechanics-einstein-general-relativity/",
+    "body": "This is where a unification of three fundamental physical constants occurs: Planck's constant, originating from quantum mechanics; Newton's gravitational constant from classical gravitation; and the speed of light, which Einstein proved to be constant through general relativity."
+},
+{
+    "title": "Quantum Mechanics and General Relativity Come Together ... - SciTechDaily",
+    "href": "https://scitechdaily.com/quantum-mechanics-and-general-relativity-come-together-astrophysicists-observe-long-theorized-quantum-phenomena/",
+    "body": "A team led by students probes the mass-radius relation of white dwarf stars, observing in their data evidence of quantum mechanics and Einstein's theory of general relativity.. At the heart of every white dwarf star—the dense stellar object that remains after a star has burned away its fuel reserve of gases as it nears the end of its life cycle—lies a quantum conundrum: as white dwarfs ..."
+},
+{
+    "title": "Mathematical discovery could shed light on secrets of the Universe ...",
+    "href": "https://www.sciencedaily.com/releases/2022/03/220309090800.htm",
+    "body": "In an article recently published in the journal Nature Communications, Daniel Persson and Robert Berman, together with Tristan Collins of MIT in the USA, showed how gravity emerges from a special..."
+},
+{
+    "title": "New Theory of Everything Unites Quantum Mechanics with Relativity ...",
+    "href": "https://www.discovermagazine.com/the-sciences/new-theory-of-everything-unites-quantum-mechanics-with-relativity-and-much",
+    "body": "Despite this success, one outstanding challenge is to unite two entirely different but fundamental pillars of modern science: the theory of relativity, which describes the universe on a large scale; and the theory of quantum mechanics, which describes it on the smallest scale."
+},
+{
+    "title": "Physicists Take a New Approach to Unify Quantum Theory ... - SciTechDaily",
+    "href": "https://scitechdaily.com/physicists-take-new-approach-unify-quantum-theory-theory-relativity/",
+    "body": "Physicists from the Max Planck Institute and the Perimeter Institute in Canada have developed a new approach to the unification of the general theory of relativity and quantum theory. Present-day physics cannot describe what happened in the Big Bang. Quantum theory and the theory of relativity fail in this almost infinitely dense and hot primal ..."
+},
+{
+    "title": "Relativity versus quantum mechanics: the battle for the universe",
+    "href": "https://www.theguardian.com/news/2015/nov/04/relativity-quantum-mechanics-universe-physicists",
+    "body": "In general relativity, events are continuous and deterministic, meaning that every cause matches up to a specific, local effect. In quantum mechanics, events produced by the interaction of..."
+},
+{
+    "title": "A list of inconveniences between quantum mechanics and (general ...",
+    "href": "https://physics.stackexchange.com/questions/387/a-list-of-inconveniences-between-quantum-mechanics-and-general-relativity",
+    "body": "There are zero contradictions between quantum mechanics and special relativity; quantum field theory is the framework that unifies them. General relativity also works perfectly well as a low-energy effective quantum field theory."
+}]
