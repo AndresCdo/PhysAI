@@ -1,0 +1,4 @@
+import numpy as np
+import math
+def equation(x, y, z):
+  return (np.power(x/y, 2)+np.power(x*z, 2))*np.power(np.log10(z), 3)*np.power(np.exp(1), 1/x*y)-np.power(np.exp(x*y), 2)
