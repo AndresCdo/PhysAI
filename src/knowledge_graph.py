@@ -28,3 +28,15 @@ class KnowledgeGraph:
             with open(f"{data_type}.json", "w") as f:
                 json.dump(self.__dict__[data_type], f, indent=2)
     
+    def get_entry(self, identifier, data_type):
+        """
+        Retrieve an entry from the knowledge graph.
+
+        Args:
+            identifier (str): The unique identifier of the entry.
+            data_type (str): The type of data being retrieved.
+
+        Returns:
+            The content of the entry, or None if the identifier does not exist.
+        """
+        return self.__dict__[data_type].get(identifier)   
