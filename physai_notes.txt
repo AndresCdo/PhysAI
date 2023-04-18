@@ -1,6 +1,0 @@
-1. Equation Generation
-2. Error Correction
-3. Integration with Existing Research
-4. LaTeX Document Generation
-5. Collaborative Learning
-6. Open Source
