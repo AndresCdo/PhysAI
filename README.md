@@ -1,8 +1,40 @@
 # PhysAI
  
- ## Introduction
- The PhysAI open-source project is a collaborative initiative aimed at developing an AI system that generates physical equations, tests them, proves their validity, and promotes their physical sense. The ultimate goal of the project is to link the equations of quantum mechanics and general relativity, which are two of the most fundamental physical theories that describe the behavior of matter and energy in the universe.
-To achieve this goal, PhysAI leverages machine learning algorithms and integrates them with existing research to generate and improve physical equations. The system will be trained on a vast amount of data from experiments, observations, and simulations to create accurate and reliable equations that can explain physical phenomena. The AI system will also test and verify the equations it generates by comparing them with the results of experiments and other data sources.
-PhysAI will be able to learn from its mistakes and continually improve its accuracy and reliability. The system will also promote collaborative learning, encouraging contributions from a diverse group of experts from different scientific fields, including physics, mathematics, computer science, and engineering. The goal is to create a community-driven platform that fosters transparency, collaboration, and innovation.
-In addition, PhysAI will generate LaTeX documents that elegantly link the equations of quantum mechanics and general relativity, making them accessible to researchers, academics, and enthusiasts. These documents will provide explanations for the physical phenomena described by the equations and promote a better understanding of the underlying physical principles.
-Overall, the PhysAI open-source project is an ambitious initiative that aims to bring together different scientific fields and develop an AI system that can link two of the most fundamental physical theories. The project is community-driven and relies on contributions from a diverse group of experts to continuously improve its accuracy and reliability.
+PhysAI is an open-source project aimed at developing an AI system that generates, tests, and validates physical equations, with a particular focus on linking quantum mechanics and general relativity. By leveraging machine learning algorithms and integrating them with existing research, PhysAI aims to create accurate and reliable equations that can explain physical phenomena.
+
+## Features
+- Data collection and preprocessing from experiments, observations, and simulations
+- AI-driven generation and improvement of physical equations
+- Equation verification through comparison with experimental results and other data sources
+- Collaborative learning platform that encourages contributions from diverse scientific fields
+- LaTeX integration for generating professional, accessible documents
+- Robust testing and continuous integration
+
+## Getting Started
+
+### Prerequisites
+- Python 3.6+
+- LaTeX distribution (e.g. [TeX Live](https://www.tug.org/texlive/))
+
+### Installation
+1. Clone the repository
+2. Install the required Python packages
+```shell
+pip install -r requirements.txt
+```
+3. Install the required LaTeX packages
+```shell
+tlmgr install $(cat tex/requirements.txt)
+```
+4. Install the PhysAI package
+```shell
+python setup.py install
+```
+### Usage
+You can find the User Guide [here](https://github.com/AndresCdo/PhysAI/blob/master/docs/user_guide.md).
+
+## Contributing
+PhysAI is currently in the early stages of development. If you are interested in contributing feel free to clone the repository and submit a pull request. If you have any questions or suggestions, please open an issue.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/AndresCdo/PhysAI/blob/master/LICENSE) file for details.
