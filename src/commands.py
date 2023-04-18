@@ -1,3 +1,9 @@
+"""
+commands.py
+
+A module to evaluate code and return the result.
+"""
+
 def evaluate_code(code):
 	"""Evaluates the code and returns the result"""
 	result = None
