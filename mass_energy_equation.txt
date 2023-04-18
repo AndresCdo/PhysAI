@@ -1,5 +1,0 @@
-The refined version that incorporates both relativistic mass and gravitational energy can be expressed as:
-
-E² = (mc²)² + (pc)² + U
-
-Where E is the total energy, m is the relativistic mass, c is the speed of light, p is the momentum, and U is the gravitational potential energy. This equation accounts for the effects of both relativity and gravity, making it a more accurate representation of the relationship between mass and energy in various physical systems.
