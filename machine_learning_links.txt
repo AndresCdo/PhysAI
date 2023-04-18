@@ -1,8 +1,0 @@
-Physics-informed machine learning | Nature Reviews Physics
-Physics-informed learning of governing equations from scarce data - Nature
-Scientific Machine Learning Through Physics-Informed ... - Springer
-Machine Learning for Partial Differential Equations - arXiv
-thunil/Physics-Based-Deep-Learning - Github
-Integrating Scientific Knowledge with Machine Learning for ... - arXiv
-PDF Improving Generalization with Physical Equations
-Machine Learning and the Physical Sciences, NeurIPS 2022
