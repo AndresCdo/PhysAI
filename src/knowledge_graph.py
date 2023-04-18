@@ -39,4 +39,20 @@ class KnowledgeGraph:
         Returns:
             The content of the entry, or None if the identifier does not exist.
         """
-        return self.__dict__[data_type].get(identifier)   
+        return self.__dict__[data_type].get(identifier)
+
+    def update_entry(self, identifier, data_type, content):
+        """
+        Update an entry in the knowledge graph.
+
+        Args:
+            identifier (str): The unique identifier of the entry.
+            data_type (str): The type of data being updated.
+            content (str): The updated content of the entry.
+        """
+        if identifier in self.__dict__[data_type]:  # Check if the identifier exists
+            self.__dict__[data_type][identifier] = content
+            with open(f"{data_type}.json", "w") as f:
+                json.dump(self.__dict__[data_type], f, indent=2)
+        else:
+            print(f'{identifier} does not exist')
