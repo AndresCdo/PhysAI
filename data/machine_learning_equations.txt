@@ -1,0 +1,24 @@
+Title: Physics-informed machine learning | Nature Reviews Physics
+Link: https://www.nature.com/articles/s42254-021-00314-5
+
+Title: Physics-informed machine learning - ResearchGate
+Link: https://www.researchgate.net/publication/351814752_Physics-informed_machine_learning
+
+Title: Machine Learning and Finite Element Method for Physical Systems ... - arXiv
+Link: https://arxiv.org/pdf/1801.07337
+
+Title: Recent advances and applications of machine learning in solid-state ... | npj Computational Materials
+Link: https://www.nature.com/articles/s41524-019-0221-0
+
+Title: Artificial intelligence and machine learning in design of mechanical ... - Materials Horizons (RSC Publishing)
+Link: https://pubs.rsc.org/en/content/articlelanding/2021/mh/d0mh01451f#!
+
+Title: A review of physics-based machine learning in civil engineering | Advances in Mechanical Engineering and Science
+Link: https://www.sciencedirect.com/science/article/pii/S2590123021001171
+
+Title: Integrating Scientific Knowledge with Machine Learning for ... - arXiv
+Link: https://arxiv.org/pdf/2003.04919
+
+Title: Application of machine learning procedures for mechanical system ... - Advanced Modeling and Simulation in Engineering Sciences | Full Text
+Link: https://amses-journal.springeropen.com/articles/10.1186/s40323-020-00163-4
+
