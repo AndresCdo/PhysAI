@@ -13,7 +13,7 @@ PhysAI is an open-source project aimed at developing an AI system that generates
 ## Getting Started
 
 ### Prerequisites
-- Python 3.6+
+- Python 3.7+
 - LaTeX distribution (e.g. [TeX Live](https://www.tug.org/texlive/))
 
 ### Installation
