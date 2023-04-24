@@ -1,5 +1,4 @@
 import pytest
-
 from algorithms.equation_generation import EquationGenerator
 from algorithms.equation_verification import EquationVerifier
 from data_processing.data_collection import DataCollector
