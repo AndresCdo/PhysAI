@@ -1,5 +1,5 @@
 arxiv
-tex2py
 numpy
 tensorflow
 transformers
+pylatexenc
