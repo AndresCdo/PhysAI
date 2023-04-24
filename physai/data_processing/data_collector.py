@@ -1,5 +1,8 @@
 import arxiv
 import os
+import tarfile
+import re
+import shutil
 
 class DataCollector:
     """A class to collect public documents from the ArXiv website."""
@@ -34,12 +37,24 @@ class DataCollector:
 
         for result in results:
             paper_id = result.get('id').split('/')[-1]
-            pdf_url = result.get('pdf_url')
-            file_name = f"{paper_id}.pdf"
+            arxiv_id = result.get('arxiv_url').split('/')[-1]
+            source_url = f'http://arxiv.org/e-print/{arxiv_id}'
+            file_name = f"{paper_id}.tar.gz"
             output_path = os.path.join(self.output_dir, file_name)
 
-            arxiv.download(result, dirpath=self.output_dir, filename=file_name)
+            arxiv.download(result, src=True, dirpath=self.output_dir, filename=file_name)
             print(f'Downloaded {file_name} to {output_path}')
+
+            with tarfile.open(output_path, 'r:gz') as tar:
+                members = [m for m in tar.getmembers() if re.search(r'\.tex$', m.name)]
+
+                if members:
+                    tar.extractall(path=self.output_dir, members=members)
+                    for member in members:
+                        shutil.move(os.path.join(self.output_dir, member.name), os.path.join(self.output_dir, f"{paper_id}-{member.name}"))
+                        print(f"Extracted {paper_id}-{member.name} from {file_name}")
+
+                os.remove(output_path)
 
 if __name__ == '__main__':
     data_collector = DataCollector()
