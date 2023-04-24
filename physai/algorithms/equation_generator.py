@@ -1,6 +1,7 @@
 import numpy as np
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
+
 class EquationGenerator:
     """A class to generate physical equations using machine learning algorithms."""
 
@@ -12,9 +13,13 @@ class EquationGenerator:
             model: A machine learning model for generating physical equations.
             data: Preprocessed training data.
         """
-        self.tokenizer = GPT2Tokenizer.from_pretrained(model_name) # Load the tokenizer for the model
-        self.model = GPT2LMHeadModel.from_pretrained(model_name) # Load the model itself
-        self.data = data # Store the training data for later use
+        self.tokenizer = GPT2Tokenizer.from_pretrained(
+            model_name
+        )  # Load the tokenizer for the model
+        self.model = GPT2LMHeadModel.from_pretrained(
+            model_name
+        )  # Load the model itself
+        self.data = data  # Store the training data for later use
 
     def train(self, epochs, batch_size):
         """
@@ -25,7 +30,7 @@ class EquationGenerator:
             batch_size: Batch size for training.
         """
         # Implement the training logic for your specific model here.
- 
+
         self.model.fit(self.data, epochs=epochs, batch_size=batch_size)
 
     def generate_equation(self, input_text, max_length=50, num_return_sequences=1):
@@ -41,7 +46,7 @@ class EquationGenerator:
         # Implement the equation generation logic for your specific model here.
         input_ids = self.tokenizer.encode(input_text, return_tensors="pt")
 
-                # Generate output sequences
+        # Generate output sequences
         output_sequences = self.model.generate(
             input_ids=input_ids,
             max_length=max_length,

@@ -1,6 +1,6 @@
 import unittest
 
-input_code = '''
+input_code = """
 def add_numbers(a, b):
     return a + b
     
@@ -16,7 +16,8 @@ def improved_code():
         print(i)
         print('Goodbye World!')
         print('All tests passed!')
-'''
+"""
+
 
 class TestAddition(unittest.TestCase):
     """Tests the addition function"""
@@ -29,6 +30,7 @@ class TestAddition(unittest.TestCase):
         """Test if the function correctly adds two negative numbers."""
         self.assertEqual(add_numbers(-2, -3), -5)
 
+
 class TestMultiplication(unittest.TestCase):
     """Tests the multiplication function"""
 
@@ -39,6 +41,7 @@ class TestMultiplication(unittest.TestCase):
     def test_multiplication_with_zero(self):
         """Test if the function correctly multiplies a number by zero."""
         self.assertEqual(multiply_numbers(0, 3), 0)
+
 
 class TestSubtraction(unittest.TestCase):
     """Tests the subtraction function"""
@@ -51,6 +54,7 @@ class TestSubtraction(unittest.TestCase):
         """Test if the function correctly subtracts two negative numbers."""
         self.assertEqual(subtract_numbers(0, 0), 0)
 
+
 class TestImprovedCode(unittest.TestCase):
     """Tests the improved_code function"""
 
@@ -59,24 +63,27 @@ class TestImprovedCode(unittest.TestCase):
 
         result = improved_code()
         output = self.called_print.getvalue().strip()
-        self.assertEqual(output, 'Hello World!\n0\n1\n2\n3\n4\nGoodbye World!')
+        self.assertEqual(output, "Hello World!\n0\n1\n2\n3\n4\nGoodbye World!")
         self.assertEqual(result, None)
 
 
 class TestCode(unittest.TestSuite):
     def __init__(self):
         super(TestCode, self).__init__()
-        self.addTests([
-            TestAddition('test_addition'), 
-            TestAddition('test_addition_negative_numbers'), 
-            TestMultiplication('test_multiplication'), 
-            TestMultiplication('test_multiplication_with_zero'), 
-            TestSubtraction('test_subtraction'), 
-            TestSubtraction('test_subtraction_zeroradius_circle'), 
-            TestImprovedCode('test_improved_code')
-            ])
+        self.addTests(
+            [
+                TestAddition("test_addition"),
+                TestAddition("test_addition_negative_numbers"),
+                TestMultiplication("test_multiplication"),
+                TestMultiplication("test_multiplication_with_zero"),
+                TestSubtraction("test_subtraction"),
+                TestSubtraction("test_subtraction_zeroradius_circle"),
+                TestImprovedCode("test_improved_code"),
+            ]
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCode)
     runner = unittest.TextTestRunner()
     runner.run(suite)

@@ -52,7 +52,7 @@ class EquationVerifier:
         # Implement the comparison logic with known equations here.
         return is_valid, similarity
 
-    def verify_equation(self, equation, methods=['experiment', 'simulation', 'known']):
+    def verify_equation(self, equation, methods=["experiment", "simulation", "known"]):
         """
         Verify the generated equation using a combination of methods.
 
@@ -65,11 +65,11 @@ class EquationVerifier:
             similarity: A similarity score between the generated equation and the selected methods.
         """
         verification_results = []
-        if 'experiment' in methods:
+        if "experiment" in methods:
             verification_results.append(self.compare_with_experiment(equation))
-        if 'simulation' in methods:
+        if "simulation" in methods:
             verification_results.append(self.compare_with_simulation(equation))
-        if 'known' in methods:
+        if "known" in methods:
             verification_results.append(self.compare_with_known_equations(equation))
 
         # Combine the verification results from different methods here.

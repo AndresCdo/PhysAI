@@ -1,5 +1,6 @@
 import json
 
+
 class KnowledgeGraph:
     """A class to represent a knowledge graph."""
 
@@ -21,13 +22,15 @@ class KnowledgeGraph:
             content (str): The content of the entry.
         """
 
-        if identifier in self.__dict__[data_type]: # Check if the identifier already exists
-            print(f'{identifier} already exists')
-        else: # If it doesn't, add it
+        if (
+            identifier in self.__dict__[data_type]
+        ):  # Check if the identifier already exists
+            print(f"{identifier} already exists")
+        else:  # If it doesn't, add it
             self.__dict__[data_type][identifier] = content
             with open(f"{data_type}.json", "w") as f:
                 json.dump(self.__dict__[data_type], f, indent=2)
-    
+
     def get_entry(self, identifier, data_type):
         """
         Retrieve an entry from the knowledge graph.
@@ -55,4 +58,4 @@ class KnowledgeGraph:
             with open(f"{data_type}.json", "w") as f:
                 json.dump(self.__dict__[data_type], f, indent=2)
         else:
-            print(f'{identifier} does not exist')
+            print(f"{identifier} does not exist")
