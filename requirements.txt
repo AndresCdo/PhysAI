@@ -1,5 +1,5 @@
 arxiv
-PyPDF2
+tex2py
 numpy
 tensorflow
 transformers
