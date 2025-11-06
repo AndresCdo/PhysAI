@@ -51,11 +51,7 @@ File encoding: ✅ All files use explicit UTF-8 encoding
 ==============================================================================
 6. FILES CHANGED SUMMARY
 ==============================================================================
-fatal: ambiguous argument 'origin/main': unknown revision or path not in the working tree.
-Use '--' to separate paths from revisions, like this:
-'git <command> [<revision>...] -- [<file>...]'
-Using current branch as baseline
-
+No upstream branch found; using current branch as baseline.
 ==============================================================================
 7. FINAL STATUS
 ==============================================================================
