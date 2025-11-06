@@ -1,7 +1,8 @@
+"""Module for GAN-based equation generation."""
 import numpy as np
-from tensorflow.keras.layers import LSTM, Dense, Embedding, Input
-from tensorflow.keras.models import Model, Sequential, load_model
-from tensorflow.keras.optimizers import Adam
+from keras.layers import LSTM, Dense, Embedding, Input
+from keras.models import Model, Sequential, load_model
+from keras.optimizers import Adam
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 
@@ -69,7 +70,8 @@ class GANModel:
             generator_loss = gan.train_on_batch(noise, generator_labels)
 
             print(
-                f"Epoch {epoch}: Generator loss: {generator_loss}, discriminator loss: {discriminator_loss}"
+                f"Epoch {epoch}: Generator loss: {generator_loss}, "
+                f"discriminator loss: {discriminator_loss}"
             )
 
         generator.save("generator.h5")
@@ -82,9 +84,14 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            token_int = int(token.argmax())
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            if token_int in self.tokenizer.get_vocab().values():
+                for word, idx in self.tokenizer.get_vocab().items():
+                    if idx == token_int:
+                        generated_equation += word + " "
+                        break
 
         return generated_equation
 
@@ -104,16 +111,21 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            token_int = int(token.argmax())
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            if token_int in self.tokenizer.get_vocab().values():
+                for word, idx in self.tokenizer.get_vocab().items():
+                    if idx == token_int:
+                        generated_equation += word + " "
+                        break
 
         return generated_equation
 
     def generate_equation_from_trained_gan_with_input_and_noise(
         self, input_text, max_length
     ):
-        """Generate an equation from a trained GAN model with the given input text and noise."""
+        """Generate an equation from a trained GAN with input text and noise."""
         generator = load_model("generator.h5")
         input_ids = self.tokenizer.encode(input_text, return_tensors="pt")
         input_tokens = input_ids[0].numpy()
@@ -132,8 +144,13 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            token_int = int(token.argmax() if hasattr(token, 'argmax') else token)
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            if token_int in self.tokenizer.get_vocab().values():
+                for word, idx in self.tokenizer.get_vocab().items():
+                    if idx == token_int:
+                        generated_equation += word + " "
+                        break
 
         return generated_equation

@@ -1,5 +1,6 @@
-from .latex_generator import LatexGeneration
-from .latex_utils import (
+"""LaTeX package initialization."""
+from physai.latex.latex_generator import LatexGenerator
+from physai.latex.latex_utils import (
     label_equation,
     latex_escape,
     wrap_in_align_environment,
@@ -7,9 +8,10 @@ from .latex_utils import (
 )
 
 __all__ = [
-    "LatexGeneration",
+    "LatexGenerator",
     "latex_escape",
     "wrap_in_equation_environment",
     "wrap_in_align_environment",
     "label_equation",
 ]
+

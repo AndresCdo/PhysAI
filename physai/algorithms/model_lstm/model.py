@@ -1,13 +1,15 @@
+"""Module for LSTM-based LaTeX equation generation model."""
 import numpy as np
-from tensorflow.keras.layers import LSTM, Dense, Embedding
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
+from keras.layers import LSTM, Dense, Embedding
+from keras.models import Sequential
+from keras.optimizers import Adam
+from keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.text import Tokenizer
 
 
 class LaTeXModel:
     def __init__(self, latex_data, epochs=50, batch_size=64):
+        """Initialize the LaTeX model with training data and parameters."""
         self.latex_data = latex_data
         self.epochs = epochs
         self.batch_size = batch_size
@@ -19,6 +21,7 @@ class LaTeXModel:
         self.model = self.build_model()
 
     def prepare_sequences(self):
+        """Prepare input and output sequences for training."""
         sequences = self.tokenizer.texts_to_sequences(self.latex_data)
         input_sequences, output_sequences = [], []
 
@@ -27,7 +30,7 @@ class LaTeXModel:
                 input_sequences.append(sequence[:i])
                 output_sequences.append(sequence[i])
 
-        max_length = max([len(seq) for seq in input_sequences])
+        max_length = max(len(seq) for seq in input_sequences)
         self.max_length = max_length
         input_sequences = pad_sequences(
             input_sequences, maxlen=max_length, padding="pre"
@@ -37,6 +40,7 @@ class LaTeXModel:
         return input_sequences, output_sequences
 
     def build_model(self):
+        """Build the LSTM model architecture."""
         model = Sequential(
             [
                 Embedding(self.vocab_size, 128, input_length=self.max_length),
@@ -53,6 +57,7 @@ class LaTeXModel:
         return model
 
     def train(self):
+        """Train the model on the prepared sequences."""
         self.model.fit(
             self.input_sequences,
             self.output_sequences,

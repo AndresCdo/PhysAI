@@ -1,7 +1,8 @@
+"""Module for generating LaTeX documents from equations."""
 import os
 
-from algorithms.equation_generation import EquationGenerator
-from algorithms.equation_verification import EquationVerifier
+from physai.algorithms.equation_generator import EquationGenerator
+from physai.algorithms.equation_verifier import EquationVerifier
 
 
 class LatexGenerator:
@@ -12,7 +13,8 @@ class LatexGenerator:
         Initialize the LatexGenerator class with an output directory.
 
         Args:
-            output_dir: The output directory for the generated LaTeX documents (default: 'latex_documents').
+            output_dir: The output directory for the generated LaTeX documents
+                (default: 'latex_documents').
         """
         self.output_dir = output_dir
         if not os.path.exists(output_dir):
@@ -28,7 +30,7 @@ class LatexGenerator:
         """
         output_path = os.path.join(self.output_dir, f"{file_name}.tex")
 
-        with open("latex_document_template.tex", "r") as template_file:
+        with open("latex_document_template.tex", "r", encoding='utf-8') as template_file:
             template_content = template_file.read()
 
         equations_section = "\\section{Generated Equations}\n"
@@ -41,7 +43,7 @@ class LatexGenerator:
             "\\section{Results}", f"\\section{{Results}}\n{equations_section}"
         )
 
-        with open(output_path, "w") as output_file:
+        with open(output_path, "w", encoding='utf-8') as output_file:
             output_file.write(content)
 
         print(f"Generated LaTeX document: {output_path}")

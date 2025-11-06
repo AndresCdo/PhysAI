@@ -1,3 +1,6 @@
+"""Module for LaTeX utility functions."""
+
+
 def latex_escape(text):
     """
     Escape special characters in the text for use in LaTeX.

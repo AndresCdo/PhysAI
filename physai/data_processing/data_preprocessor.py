@@ -1,5 +1,7 @@
-import PyPDF2
+"""Module for preprocessing collected documents."""
 import os
+import PyPDF2
+
 
 class DataPreprocessor:
     """A class to preprocess the collected documents."""
@@ -28,11 +30,11 @@ class DataPreprocessor:
             text: The extracted text from the PDF document.
         """
         with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfFileReader(file)
+            pdf_reader = PyPDF2.PdfReader(file)
             text = ''
 
-            for page_num in range(pdf_reader.numPages):
-                text += pdf_reader.getPage(page_num).extractText()
+            for page in pdf_reader.pages:
+                text += page.extract_text()
 
         return text
 

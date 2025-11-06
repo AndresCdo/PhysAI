@@ -1,3 +1,4 @@
+"""Module for knowledge graph management."""
 import json
 
 
@@ -28,7 +29,7 @@ class KnowledgeGraph:
             print(f"{identifier} already exists")
         else:  # If it doesn't, add it
             self.__dict__[data_type][identifier] = content
-            with open(f"{data_type}.json", "w") as f:
+            with open(f"{data_type}.json", "w", encoding='utf-8') as f:
                 json.dump(self.__dict__[data_type], f, indent=2)
 
     def get_entry(self, identifier, data_type):
@@ -55,7 +56,7 @@ class KnowledgeGraph:
         """
         if identifier in self.__dict__[data_type]:  # Check if the identifier exists
             self.__dict__[data_type][identifier] = content
-            with open(f"{data_type}.json", "w") as f:
+            with open(f"{data_type}.json", "w", encoding='utf-8') as f:
                 json.dump(self.__dict__[data_type], f, indent=2)
         else:
             print(f"{identifier} does not exist")

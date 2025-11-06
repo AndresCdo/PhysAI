@@ -1,41 +1,32 @@
 """
 commands.py
 
-A module to evaluate code and return the result.
+A module to provide the main CLI entry point for PhysAI.
 """
 
 import sys
 
 
-def evaluate_code(code):
+def main():
     """
-    Evaluates the code and returns the result.
-
-    Args:
-        code (str): The code to be evaluated.
-
-    Returns:
-        The result of the evaluation or an error message if an exception is raised.
+    Main entry point for the PhysAI command-line interface.
     """
-    result = None
-    try:
-        result = eval(code)
-        return f"Result: {result}"
-    except SyntaxError as se:
-        return f"Error: {se}"
-    except NameError as ne:
-        return f"Error: {ne}"
-    except TypeError as te:
-        return f"Error: {te}"
-    except ZeroDivisionError as zde:
-        return f"Error: {zde}"
-    except Exception as e:
-        return f"Unexpected error: {e}"
+    if len(sys.argv) > 1:
+        command = sys.argv[1]
+        if command == "version":
+            print("PhysAI v0.0.1")
+        elif command == "help":
+            print("PhysAI - AI-driven platform for physical equations")
+            print("\nAvailable commands:")
+            print("  version - Show version information")
+            print("  help    - Show this help message")
+        else:
+            print(f"Unknown command: {command}")
+            print("Run 'physai help' for available commands")
+    else:
+        print("PhysAI - AI-driven platform for physical equations")
+        print("Run 'physai help' for available commands")
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        code = sys.argv[1]
-        print(evaluate_code(code))
-    else:
-        print("Please provide code to evaluate as an argument.")
+    main()
