@@ -36,7 +36,7 @@ class DataPreprocessor:
             text = ''
 
             for page in pdf_reader.pages:
-                text += page.extract_text()
+                text += page.extract_text() or ''
 
         return text
 
