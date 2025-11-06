@@ -1,5 +1,11 @@
-import arxiv
+"""Module for collecting documents from ArXiv."""
 import os
+import re
+import shutil
+import tarfile
+
+import arxiv
+
 
 class DataCollector:
     """A class to collect public documents from the ArXiv website."""
@@ -15,32 +21,59 @@ class DataCollector:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-    def collect_documents(self, search_query, max_results=100, sort_by='relevance', sort_order='descending'):
+    def collect_documents(
+        self, search_query, max_results=100
+    ):
         """
         Collect documents from the ArXiv website based on a search query.
 
         Args:
             search_query: The search query for collecting documents.
             max_results: The maximum number of documents to collect (default: 100).
-            sort_by: The sorting criteria (default: 'relevance').
-            sort_order: The sorting order (default: 'descending').
         """
-        results = arxiv.query(
+        # Use the new arxiv API
+        client = arxiv.Client()
+        search = arxiv.Search(
             query=search_query,
             max_results=max_results,
-            sort_by=sort_by,
-            sort_order=sort_order
+            sort_by=arxiv.SortCriterion.Relevance
         )
 
-        for result in results:
-            paper_id = result.get('id').split('/')[-1]
-            pdf_url = result.get('pdf_url')
-            file_name = f"{paper_id}.pdf"
+        for result in client.results(search):
+            paper_id = result.entry_id.split('/')[-1]
+            file_name = f"{paper_id}.tar.gz"
             output_path = os.path.join(self.output_dir, file_name)
 
-            arxiv.download(result, dirpath=self.output_dir, filename=file_name)
-            print(f'Downloaded {file_name} to {output_path}')
+            # Download the source files
+            try:
+                result.download_source(dirpath=self.output_dir, filename=file_name)
+                print(f'Downloaded {file_name} to {output_path}')
 
+                # Extract .tex files from the tar.gz
+                with tarfile.open(output_path, 'r:gz') as tar:
+                    members = [
+                        m for m in tar.getmembers()
+                        if re.search(r'\.tex$', m.name)
+                    ]
+
+                    if members:
+                        tar.extractall(path=self.output_dir, members=members)
+                        for member in members:
+                            src = os.path.join(self.output_dir, member.name)
+                            dst = os.path.join(
+                                self.output_dir,
+                                f"{paper_id}-{member.name}"
+                            )
+                            shutil.move(src, dst)
+                            print(f"Extracted {paper_id}-{member.name} from {file_name}")
+
+                os.remove(output_path)
+            except arxiv.ArxivError as error:
+                print(f"ArXiv error downloading {paper_id}: {error}")
+            except tarfile.TarError as error:
+                print(f"Tarfile error processing {file_name}: {error}")
+            except OSError as error:
+                print(f"OS error handling {file_name}: {error}")
 if __name__ == '__main__':
     data_collector = DataCollector()
 

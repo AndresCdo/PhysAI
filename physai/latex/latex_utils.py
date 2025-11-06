@@ -1,3 +1,6 @@
+"""Module for LaTeX utility functions."""
+
+
 def latex_escape(text):
     """
     Escape special characters in the text for use in LaTeX.
@@ -9,18 +12,18 @@ def latex_escape(text):
         The escaped text.
     """
     latex_special_chars = {
-        '&': '\\&',
-        '%': '\\%',
-        '$': '\\$',
-        '#': '\\#',
-        '_': '\\_',
-        '{': '\\{',
-        '}': '\\}',
-        '~': '\\textasciitilde{}',
-        '^': '\\^{}',
-        '\\': '\\textbackslash{}',
+        "&": "\\&",
+        "%": "\\%",
+        "$": "\\$",
+        "#": "\\#",
+        "_": "\\_",
+        "{": "\\{",
+        "}": "\\}",
+        "~": "\\textasciitilde{}",
+        "^": "\\^{}",
+        "\\": "\\textbackslash{}",
     }
-    return ''.join(latex_special_chars.get(c, c) for c in text)
+    return "".join(latex_special_chars.get(c, c) for c in text)
 
 
 def wrap_in_equation_environment(equation):

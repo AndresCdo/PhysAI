@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
@@ -26,12 +26,19 @@ setup(
     ],
     python_requires=">=3.7",
     install_requires=[
-        # Add your project's dependencies here
+        "arxiv>=2.0.0",
+        "numpy>=1.19.0",
+        "tensorflow>=2.10.0",
+        "transformers>=4.20.0",
+        "pylatexenc>=2.10",
+        "keras-preprocessing>=1.1.0",
+        "PyPDF2>=3.0.0",
     ],
     extras_require={
         "dev": [
-            "pytest",
-            "pytest-cov",
+            "pytest>=7.0.0",
+            "pytest-cov>=3.0.0",
+            "pylint>=2.15.0",
         ],
     },
     entry_points={

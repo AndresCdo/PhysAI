@@ -152,3 +152,4 @@ cython_debug/
 #.idea/
 *file_logger.txt
 latex_documents
+data
