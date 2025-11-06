@@ -3,11 +3,17 @@ import numpy as np
 from keras.layers import LSTM, Dense, Embedding
 from keras.models import Sequential
 from keras.optimizers import Adam
-from keras.preprocessing.sequence import pad_sequences
-from keras.preprocessing.text import Tokenizer
+try:
+    from keras.preprocessing.sequence import pad_sequences
+    from keras.preprocessing.text import Tokenizer
+except ImportError:
+    from keras_preprocessing.sequence import pad_sequences
+    from keras_preprocessing.text import Tokenizer
 
 
 class LaTeXModel:
+    """LSTM-based model for generating LaTeX equations."""
+
     def __init__(self, latex_data, epochs=50, batch_size=64):
         """Initialize the LaTeX model with training data and parameters."""
         self.latex_data = latex_data

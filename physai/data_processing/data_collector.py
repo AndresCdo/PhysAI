@@ -22,8 +22,7 @@ class DataCollector:
             os.makedirs(output_dir)
 
     def collect_documents(
-        self, search_query, max_results=100, sort_by='relevance',
-        sort_order='descending'
+        self, search_query, max_results=100
     ):
         """
         Collect documents from the ArXiv website based on a search query.
@@ -31,8 +30,6 @@ class DataCollector:
         Args:
             search_query: The search query for collecting documents.
             max_results: The maximum number of documents to collect (default: 100).
-            sort_by: The sorting criteria (default: 'relevance').
-            sort_order: The sorting order (default: 'descending').
         """
         # Use the new arxiv API
         client = arxiv.Client()
@@ -54,19 +51,25 @@ class DataCollector:
 
                 # Extract .tex files from the tar.gz
                 with tarfile.open(output_path, 'r:gz') as tar:
-                    members = [m for m in tar.getmembers() if re.search(r'\.tex$', m.name)]
+                    members = [
+                        m for m in tar.getmembers()
+                        if re.search(r'\.tex$', m.name)
+                    ]
 
                     if members:
                         tar.extractall(path=self.output_dir, members=members)
                         for member in members:
                             src = os.path.join(self.output_dir, member.name)
-                            dst = os.path.join(self.output_dir, f"{paper_id}-{member.name}")
+                            dst = os.path.join(
+                                self.output_dir,
+                                f"{paper_id}-{member.name}"
+                            )
                             shutil.move(src, dst)
                             print(f"Extracted {paper_id}-{member.name} from {file_name}")
 
                 os.remove(output_path)
-            except Exception as e:
-                print(f"Error downloading {paper_id}: {e}")
+            except Exception as error:
+                print(f"Error downloading {paper_id}: {error}")
 
 
 if __name__ == '__main__':

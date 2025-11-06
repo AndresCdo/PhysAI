@@ -44,3 +44,4 @@ def latex_generator():
     """Fixture for LatexGenerator."""
     return LatexGenerator()
 
+

@@ -11,8 +11,10 @@ class DataPreprocessor:
         Initialize the DataPreprocessor with input and output directories.
 
         Args:
-            input_dir: The input directory containing the collected documents (default: 'data').
-            output_dir: The output directory for the preprocessed documents (default: 'preprocessed_data').
+            input_dir: The input directory containing the collected documents
+                (default: 'data').
+            output_dir: The output directory for the preprocessed documents
+                (default: 'preprocessed_data').
         """
         self.input_dir = input_dir
         self.output_dir = output_dir

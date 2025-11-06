@@ -13,7 +13,7 @@ class EquationVerifier:
         """
         self.data = data
 
-    def compare_with_experiment(self, equation):
+    def compare_with_experiment(self, equation):  # pylint: disable=unused-argument
         """
         Compare the generated equation with experimental data.
 
@@ -31,7 +31,7 @@ class EquationVerifier:
         similarity = 0.0
         return is_valid, similarity
 
-    def compare_with_simulation(self, equation):
+    def compare_with_simulation(self, equation):  # pylint: disable=unused-argument
         """
         Compare the generated equation with simulation data.
 
@@ -49,7 +49,7 @@ class EquationVerifier:
         similarity = 0.0
         return is_valid, similarity
 
-    def compare_with_known_equations(self, equation):
+    def compare_with_known_equations(self, equation):  # pylint: disable=unused-argument
         """
         Compare the generated equation with known physical equations.
 
@@ -85,7 +85,7 @@ class EquationVerifier:
         """
         if methods is None:
             methods = ["experiment", "simulation", "known"]
-        
+
         verification_results = []
         if "experiment" in methods:
             verification_results.append(self.compare_with_experiment(equation))

@@ -7,6 +7,8 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 
 class GANModel:
+    """GAN-based model for generating physical equations."""
+
     def __init__(self, data, model_name="gpt2"):
         """Initialize the GANModel with a machine learning model and training data."""
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)

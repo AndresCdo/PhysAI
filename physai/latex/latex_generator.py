@@ -48,20 +48,23 @@ class LatexGenerator:
 
         print(f"Generated LaTeX document: {output_path}")
 
-
 if __name__ == "__main__":
     # Instantiate the classes from the algorithms module
-    equation_generator = EquationGenerator()
-    equation_verifier = EquationVerifier()
+    equation_generator = EquationGenerator(data=None)
+    equation_verifier = EquationVerifier(data=None)
 
     # Generate and verify equations (dummy example)
-    generated_equations = equation_generator.generate_equations()
-    verified_equations = equation_verifier.verify_equations(generated_equations)
+    generated_equations = [
+        equation_generator.generate_equation("E = mc^2")[0]
+    ]
+    verified_result = equation_verifier.verify_equation(generated_equations[0])
+    print(f"Verification result: {verified_result}")
 
     # Instantiate the LatexGenerator class
     latex_generator = LatexGenerator()
 
-    # Create a LaTeX document with the verified equations
+    # Create a LaTeX document with the generated equations
     latex_generator.create_latex_document(
-        "PhysAI_Generated_Equations", verified_equations
+        "PhysAI_Generated_Equations", generated_equations
     )
+

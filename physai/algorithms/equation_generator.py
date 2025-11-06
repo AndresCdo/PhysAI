@@ -34,7 +34,7 @@ class EquationGenerator:
         # This is a placeholder for the fine-tuning logic
         print(f"Training with {epochs} epochs and batch size {batch_size}")
         print("Note: Fine-tuning GPT2 requires additional setup")
-        pass
+
 
     def generate_equation(self, input_text, max_length=50, num_return_sequences=1):
         """
