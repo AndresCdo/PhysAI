@@ -14,6 +14,22 @@ class GANModel:
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
         self.model = GPT2LMHeadModel.from_pretrained(model_name)
         self.data = data
+        # Create reverse vocabulary mapping for efficient token-to-word lookup
+        self._reverse_vocab = {
+            idx: word for word, idx in self.tokenizer.get_vocab().items()
+        }
+
+    def _token_to_word(self, token_int):
+        """
+        Convert a token integer to its word representation.
+
+        Args:
+            token_int: Integer representation of the token.
+
+        Returns:
+            The word corresponding to the token, or empty string if not found.
+        """
+        return self._reverse_vocab.get(token_int, "")
 
     def build_model(self, max_length, vocab_size):
         """Build the GAN model."""
@@ -89,11 +105,9 @@ class GANModel:
             token_int = int(token.argmax())
             if token_int == 0:
                 break
-            if token_int in self.tokenizer.get_vocab().values():
-                for word, idx in self.tokenizer.get_vocab().items():
-                    if idx == token_int:
-                        generated_equation += word + " "
-                        break
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation
 
@@ -116,11 +130,9 @@ class GANModel:
             token_int = int(token.argmax())
             if token_int == 0:
                 break
-            if token_int in self.tokenizer.get_vocab().values():
-                for word, idx in self.tokenizer.get_vocab().items():
-                    if idx == token_int:
-                        generated_equation += word + " "
-                        break
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation
 
@@ -146,13 +158,16 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            token_int = int(token.argmax() if hasattr(token, 'argmax') else token)
+            # Handle both array and scalar token types
+            if hasattr(token, 'argmax'):
+                token_int = int(token.argmax())
+            else:
+                token_int = int(token)
+
             if token_int == 0:
                 break
-            if token_int in self.tokenizer.get_vocab().values():
-                for word, idx in self.tokenizer.get_vocab().items():
-                    if idx == token_int:
-                        generated_equation += word + " "
-                        break
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation
