@@ -68,10 +68,12 @@ class DataCollector:
                             print(f"Extracted {paper_id}-{member.name} from {file_name}")
 
                 os.remove(output_path)
-            except Exception as error:
-                print(f"Error downloading {paper_id}: {error}")
-
-
+            except arxiv.ArxivError as error:
+                print(f"ArXiv error downloading {paper_id}: {error}")
+            except tarfile.TarError as error:
+                print(f"Tarfile error processing {file_name}: {error}")
+            except OSError as error:
+                print(f"OS error handling {file_name}: {error}")
 if __name__ == '__main__':
     data_collector = DataCollector()
 
