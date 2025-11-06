@@ -1,15 +1,21 @@
+"""Module for validating preprocessed documents."""
 import os
+
 
 class DataValidator:
     """A class to validate the preprocessed documents."""
 
-    def __init__(self, input_dir='preprocessed_data', output_dir='validated_data'):
+    def __init__(
+        self, input_dir='preprocessed_data', output_dir='validated_data'
+    ):
         """
         Initialize the DataValidator with input and output directories.
 
         Args:
-            input_dir: The input directory containing the preprocessed documents (default: 'preprocessed_data').
-            output_dir: The output directory for the validated documents (default: 'validated_data').
+            input_dir: The input directory containing the preprocessed documents
+                (default: 'preprocessed_data').
+            output_dir: The output directory for the validated documents
+                (default: 'validated_data').
         """
         self.input_dir = input_dir
         self.output_dir = output_dir

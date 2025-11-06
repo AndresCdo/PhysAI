@@ -1,16 +1,35 @@
+"""Module for GAN-based equation generation."""
 import numpy as np
-from tensorflow.keras.layers import LSTM, Dense, Embedding, Input
-from tensorflow.keras.models import Model, Sequential, load_model
-from tensorflow.keras.optimizers import Adam
+from keras.layers import LSTM, Dense, Embedding, Input
+from keras.models import Model, Sequential, load_model
+from keras.optimizers import Adam
 from transformers import GPT2LMHeadModel, GPT2Tokenizer
 
 
 class GANModel:
+    """GAN-based model for generating physical equations."""
+
     def __init__(self, data, model_name="gpt2"):
         """Initialize the GANModel with a machine learning model and training data."""
         self.tokenizer = GPT2Tokenizer.from_pretrained(model_name)
         self.model = GPT2LMHeadModel.from_pretrained(model_name)
         self.data = data
+        # Create reverse vocabulary mapping for efficient token-to-word lookup
+        self._reverse_vocab = {
+            idx: word for word, idx in self.tokenizer.get_vocab().items()
+        }
+
+    def _token_to_word(self, token_int):
+        """
+        Convert a token integer to its word representation.
+
+        Args:
+            token_int: Integer representation of the token.
+
+        Returns:
+            The word corresponding to the token, or empty string if not found.
+        """
+        return self._reverse_vocab.get(token_int, "")
 
     def build_model(self, max_length, vocab_size):
         """Build the GAN model."""
@@ -69,7 +88,8 @@ class GANModel:
             generator_loss = gan.train_on_batch(noise, generator_labels)
 
             print(
-                f"Epoch {epoch}: Generator loss: {generator_loss}, discriminator loss: {discriminator_loss}"
+                f"Epoch {epoch}: Generator loss: {generator_loss}, "
+                f"discriminator loss: {discriminator_loss}"
             )
 
         generator.save("generator.h5")
@@ -82,9 +102,12 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            token_int = int(token.argmax())
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation
 
@@ -104,16 +127,19 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            token_int = int(token.argmax())
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation
 
     def generate_equation_from_trained_gan_with_input_and_noise(
         self, input_text, max_length
     ):
-        """Generate an equation from a trained GAN model with the given input text and noise."""
+        """Generate an equation from a trained GAN with input text and noise."""
         generator = load_model("generator.h5")
         input_ids = self.tokenizer.encode(input_text, return_tensors="pt")
         input_tokens = input_ids[0].numpy()
@@ -132,8 +158,16 @@ class GANModel:
 
         generated_equation = ""
         for token in generated_tokens:
-            if token == 0:
+            # Handle both array and scalar token types
+            if hasattr(token, 'argmax'):
+                token_int = int(token.argmax())
+            else:
+                token_int = int(token)
+
+            if token_int == 0:
                 break
-            generated_equation += self.tokenizer.index_word[token] + " "
+            word = self._token_to_word(token_int)
+            if word:
+                generated_equation += word + " "
 
         return generated_equation

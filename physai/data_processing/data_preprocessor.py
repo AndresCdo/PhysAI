@@ -1,5 +1,7 @@
-import PyPDF2
+"""Module for preprocessing collected documents."""
 import os
+import PyPDF2
+
 
 class DataPreprocessor:
     """A class to preprocess the collected documents."""
@@ -9,8 +11,10 @@ class DataPreprocessor:
         Initialize the DataPreprocessor with input and output directories.
 
         Args:
-            input_dir: The input directory containing the collected documents (default: 'data').
-            output_dir: The output directory for the preprocessed documents (default: 'preprocessed_data').
+            input_dir: The input directory containing the collected documents
+                (default: 'data').
+            output_dir: The output directory for the preprocessed documents
+                (default: 'preprocessed_data').
         """
         self.input_dir = input_dir
         self.output_dir = output_dir
@@ -28,11 +32,11 @@ class DataPreprocessor:
             text: The extracted text from the PDF document.
         """
         with open(pdf_path, 'rb') as file:
-            pdf_reader = PyPDF2.PdfFileReader(file)
+            pdf_reader = PyPDF2.PdfReader(file)
             text = ''
 
-            for page_num in range(pdf_reader.numPages):
-                text += pdf_reader.getPage(page_num).extractText()
+            for page in pdf_reader.pages:
+                text += page.extract_text() or ''
 
         return text
 

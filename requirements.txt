@@ -3,3 +3,5 @@ numpy
 tensorflow
 transformers
 pylatexenc
+keras-preprocessing
+PyPDF2
