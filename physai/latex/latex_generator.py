@@ -30,8 +30,14 @@ class LatexGenerator:
         """
         output_path = os.path.join(self.output_dir, f"{file_name}.tex")
 
-        with open("latex_document_template.tex", "r", encoding='utf-8') as template_file:
-            template_content = template_file.read()
+        template_path = os.path.join(os.path.dirname(__file__), "latex_document_template.tex")
+        try:
+            with open(template_path, "r", encoding='utf-8') as template_file:
+                template_content = template_file.read()
+        except FileNotFoundError:
+            raise FileNotFoundError(
+                f"LaTeX template file not found at '{template_path}'. Please ensure 'latex_document_template.tex' exists."
+            )
 
         equations_section = "\\section{Generated Equations}\n"
 
