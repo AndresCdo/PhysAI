@@ -189,7 +189,7 @@ For more details, see [AGENTS.md](AGENTS.md) - Technical Notes section.
 | Milestone | Description | Status |
 |-----------|-------------|--------|
 | 0 | Rediscover T = 2π√(L/g) from pendulum data | ✅ Complete |
-| 1 | Damped pendulum with air resistance | 🔲 Pending |
+| 1 | Damped pendulum: A = a × √L × e^(-bt) | ✅ Complete |
 | 2 | Projectile motion with drag | 🔲 Pending |
 | 3 | Basic quantum mechanics (Schrödinger 1D) | 🔲 Pending |
 
