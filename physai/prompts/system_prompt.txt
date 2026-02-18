@@ -46,6 +46,11 @@ Target: energy_J [Energy]
 Inputs: mass_kg [Mass], velocity_m_s [Velocity]
 Output: a * mass_kg * velocity_m_s^2
 
+### Example 5
+Target: amplitude_m [Length]
+Inputs: length_m [Length], time_s [Time]
+Output: a * Sqrt[length_m] * Exp[-b * time_s]
+
 ## PREVIOUS ATTEMPTS
 {error_history}
 
