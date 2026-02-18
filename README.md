@@ -190,7 +190,8 @@ For more details, see [AGENTS.md](AGENTS.md) - Technical Notes section.
 |-----------|-------------|--------|
 | 0 | Rediscover T = 2π√(L/g) from pendulum data | ✅ Complete |
 | 1 | Damped pendulum: A = a × √L × e^(-bt) | ✅ Complete |
-| 2 | Projectile motion with drag | 🔲 Pending |
+| 2a | Horizontal drag: x = a × v₀ × (1 - e^(-bt)) | ✅ Complete |
+| 2b | 2D projectile: R = a × v₀² × sin(2θ) | ✅ Complete |
 | 3 | Basic quantum mechanics (Schrödinger 1D) | 🔲 Pending |
 
 ## Contributing
