@@ -348,7 +348,7 @@ ollama run granite4:1b            # Interactive chat with model
 | 1 | Damped pendulum: A = a × √L × e^(-bt) | ✅ Complete |
 | 2a | Horizontal drag: x = a × v₀ × (1 - e^(-bt)) | ✅ Complete |
 | 2b | 2D projectile: R = a × v₀² × sin(2θ) | ✅ Complete |
-| 3 | Basic quantum mechanics (Schrödinger 1D) | 🔲 Pending |
+| 3 | 1D quantum well: E = a × n² / L² | ✅ Complete |
 
 ## File Modification Checklist
 
