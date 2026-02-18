@@ -61,6 +61,11 @@ Target: range_m [Length]
 Inputs: velocity_m_s [Velocity], angle_deg [Angle]
 Output: a * velocity_m_s^2 * Sin[2 * angle_deg * Pi / 180]
 
+### Example 8
+Target: energy_ev [Energy]
+Inputs: quantum_number_n [Dimensionless], well_width_nm [Length]
+Output: a * quantum_number_n^2 / well_width_nm^2
+
 ## PREVIOUS ATTEMPTS
 {error_history}
 
