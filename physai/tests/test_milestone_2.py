@@ -46,6 +46,17 @@ class TestHorizontalDragDataset:
         assert "time_s" in df.columns
         assert "distance_m" in df.columns
 
+    @pytest.mark.xfail(
+        strict=True,
+        reason=(
+            "Data defect, not an over-strict assertion. Solutions of dv/dt = -f(v) "
+            "cannot cross, so distance at fixed time is strictly increasing in "
+            "initial velocity under any drag law. The dataset breaks this at t=5 "
+            "(v0=12 gives 46.08 m, v0=15 gives 43.56 m) and deviates from its own "
+            "documented model by up to 33.8%, against <=4% for every other "
+            "benchmark here. See issue #10."
+        ),
+    )
     def test_distance_increases_with_velocity(self, horizontal_drag_path):
         """At fixed time, distance should increase with velocity."""
         import pandas as pd

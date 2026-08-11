@@ -20,7 +20,5 @@ arxiv>=2.0.0
 # PDF processing (optional)
 PyPDF2>=3.0.0
 
-# Development dependencies (install with: pip install -r requirements.txt -r requirements-dev.txt)
-# pytest>=7.0.0
-# pytest-cov>=3.0.0
-# pylint>=2.15.0
+# Development dependencies live in requirements-dev.txt:
+#   pip install -r requirements.txt -r requirements-dev.txt

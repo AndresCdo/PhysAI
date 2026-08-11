@@ -1,0 +1,10 @@
+# Development dependencies for PhysAI
+# Install alongside the runtime dependencies:
+#   pip install -r requirements.txt -r requirements-dev.txt
+
+# Test runner
+pytest>=7.0.0
+pytest-cov>=3.0.0
+
+# Linting
+pylint>=2.15.0
