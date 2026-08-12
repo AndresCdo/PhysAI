@@ -21,15 +21,34 @@ from dataclasses import dataclass
 from typing import Dict, Mapping, Sequence, Tuple
 
 
+_LATEX_COMMANDS = (
+    (r"\\left|\\right|\\,|\\;|\\!|\$", ""),
+    (r"\\text\s*\{([^}]*)\}", r"\1"),
+    (r"\\mathrm\s*\{([^}]*)\}", r"\1"),
+    (r"\\frac\s*\{([^{}]*)\}\s*\{([^{}]*)\}", r"((\1)/(\2))"),
+    (r"\\sqrt\s*\{([^{}]*)\}", r"sqrt(\1)"),
+    (r"\\(sqrt|exp|sin|cos|tan|log|pi|cdot|times)", r"\1"),
+    (r"\bcdot\b|\btimes\b", "*"),
+    (r"_\{([^}]*)\}", r"_\1"),
+)
+
+
 def normalise(expression: str) -> str:
-    """Fold Wolfram and SymPy spellings onto one form before matching.
+    """Fold Wolfram, SymPy and LaTeX spellings onto one form before matching.
 
     Mirrors the normaliser the contamination guard uses, so "did the model emit
     the answer" and "does the prompt contain the answer" are decided the same
     way.
+
+    LaTeX is handled because larger models answer in it unprompted — qwen3.5:2b
+    replies `T = 2\\pi \\sqrt{\\frac{L}{g}}`, a verbatim recitation that a
+    Wolfram-and-SymPy-only normaliser scores as a miss.
     """
     text = expression.strip()
+    for pattern, replacement in _LATEX_COMMANDS:
+        text = re.sub(pattern, replacement, text)
     text = text.replace("[", "(").replace("]", ")")
+    text = text.replace("{", "(").replace("}", ")")
     text = text.replace("**", "^")
     text = re.sub(r"\s+", " ", text)
     return text.lower()
@@ -62,19 +81,52 @@ class Problem:
     signature: Tuple[Feature, ...]
     positives: Tuple[str, ...]
     decoys: Tuple[str, ...]
+    aliases: Tuple[Tuple[str, ...], ...] = ()
 
-    def variable_map(self, obfuscated: bool) -> Dict[str, str]:
-        """Map role names used in signatures to the names a run actually uses."""
+    def variable_map(
+        self, obfuscated: bool, permissive: bool = False
+    ) -> Dict[str, str]:
+        """Map signature roles to the names a run actually uses.
+
+        ``permissive`` additionally accepts the conventional textbook symbol for
+        each quantity, so a recitation using `L` rather than `length_m` is
+        recognised. Never applied to obfuscated runs: there the point is that no
+        meaningful symbol was supplied at all.
+        """
         roles = {"target": "var_y"} if obfuscated else {"target": self.target[0]}
         for index, (name, _) in enumerate(self.inputs):
-            roles[f"in{index}"] = f"var_{chr(ord('a') + index)}" if obfuscated else name
+            if obfuscated:
+                roles[f"in{index}"] = f"var_{chr(ord('a') + index)}"
+            elif permissive and index < len(self.aliases):
+                options = "|".join((name,) + self.aliases[index])
+                roles[f"in{index}"] = f"(?:{options})"
+            else:
+                roles[f"in{index}"] = name
         return roles
 
-    def matches(self, output: str, obfuscated: bool = False) -> bool:
+    def _all_present(self, output: str, mapping: Mapping[str, str]) -> bool:
         """True when every feature of the signature is present."""
         text = normalise(output)
-        mapping = self.variable_map(obfuscated)
         return all(f.compile_for(mapping).search(text) for f in self.signature)
+
+    def matches(self, output: str, obfuscated: bool = False) -> bool:
+        """Emitted the target law using the variable names the prompt supplied.
+
+        The strict measure: output the pipeline could actually fit.
+        """
+        return self._all_present(output, self.variable_map(obfuscated))
+
+    def recites(self, output: str, obfuscated: bool = False) -> bool:
+        """Emitted the target law with any conventional symbols.
+
+        Looser than :meth:`matches` on purpose. A model answering
+        `2*pi*sqrt(L/g)` has recalled the law even though it ignored the
+        requested variable names — stronger evidence of memorisation, not
+        weaker, and conflating it with usable output hides the distinction.
+        """
+        if obfuscated:
+            return self.matches(output, obfuscated=True)
+        return self._all_present(output, self.variable_map(False, permissive=True))
 
     def missing_features(self, output: str, obfuscated: bool = False) -> Sequence[str]:
         """Which features are absent — for diagnosing a near miss."""
@@ -106,6 +158,7 @@ _M0 = Problem(
         "a + b * length_m",
         "sqrt(a) * length_m",  # sqrt present, but not over the length
     ),
+    aliases=(("l",),),
 )
 
 _M1 = Problem(
@@ -127,6 +180,7 @@ _M1 = Problem(
         "a * exp(-b * time_s)",  # no length dependence
         "a * length_m * exp(-b * time_s)",  # linear, not sqrt
     ),
+    aliases=(("l",), ("t",)),
 )
 
 _M2A = Problem(
@@ -144,6 +198,7 @@ _M2A = Problem(
         "a * velocity_m_s * exp(-b * time_s)",  # decay, not saturation
         "a * velocity_m_s * (1 + exp(-b * time_s))",
     ),
+    aliases=(("v", "v0", "v_0"), ("t",)),
 )
 
 # Two features, because a column named "angle" makes a bare `sin` the obvious
@@ -168,6 +223,7 @@ _M2B = Problem(
         "a * velocity_m_s * sin(2 * angle_deg)",  # double angle, but no square
         "a * sin(angle_deg)",
     ),
+    aliases=(("v", "v0", "v_0"), ("theta", "th")),
 )
 
 _M3 = Problem(
@@ -188,6 +244,7 @@ _M3 = Problem(
         "a * quantum_number_n / well_width_nm^2",
         "energy_ev",  # what condition A produced: echo the target column
     ),
+    aliases=(("n",), ("l", "w")),
 )
 
 PROBLEMS: Tuple[Problem, ...] = (_M0, _M1, _M2A, _M2B, _M3)

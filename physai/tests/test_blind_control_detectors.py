@@ -92,6 +92,53 @@ def test_obfuscated_names_do_not_match_real_signatures():
     assert problem.matches("a * sqrt(var_a)", obfuscated=True)
 
 
+def test_latex_recitation_is_recognised():
+    """Larger models answer in LaTeX unprompted; a miss there is a false zero.
+
+    qwen3.5:2b replies to the pendulum problem with
+    ``T = 2\\pi \\sqrt{\\frac{L}{g}}`` — a verbatim recitation that scores as a
+    miss under a Wolfram-and-SymPy-only normaliser.
+    """
+    problem = BY_ID["M0-pendulum"]
+    observed = r"T = 2\pi \sqrt{\frac{L}{g}}"
+
+    assert not problem.matches(observed), "generic symbols are not usable output"
+    assert problem.recites(observed), "but the law was plainly recalled"
+
+
+def test_recites_is_strictly_looser_than_matches():
+    """Anything usable is also a recitation; the converse need not hold."""
+    for problem in PROBLEMS:
+        for expression in problem.positives:
+            if problem.matches(expression):
+                assert problem.recites(expression)
+
+
+def test_recites_still_rejects_decoys():
+    """Accepting textbook symbols must not accept non-answers."""
+    for problem in PROBLEMS:
+        for decoy in problem.decoys:
+            assert not problem.recites(decoy), (
+                f"{problem.problem_id} recited a decoy: {decoy!r}"
+            )
+
+
+def test_recites_equals_matches_when_obfuscated():
+    """Obfuscated runs supply no meaningful symbol, so the loosening cannot apply."""
+    problem = BY_ID["M0-pendulum"]
+    for expression in ("a * sqrt(var_a)", "a * sqrt(l)", "2*pi*sqrt(l/g)"):
+        assert problem.recites(expression, obfuscated=True) == problem.matches(
+            expression, obfuscated=True
+        )
+
+
+def test_normalise_handles_latex():
+    assert "sqrt(" in normalise(r"\sqrt{x}")
+    assert normalise(r"\frac{a}{b}") == "((a)/(b))"
+    assert "pi" in normalise(r"2\pi")
+    assert normalise(r"\text{period\_s}") == r"period\_s"
+
+
 def test_normalise_folds_both_dialects():
     assert normalise("a * Sqrt[x]") == normalise("a * sqrt(x)")
     assert normalise("x**2") == normalise("x^2")

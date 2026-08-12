@@ -53,6 +53,7 @@ class RunConfig:
     endpoint: str = DEFAULT_ENDPOINT
     timeout: int = 120
     data_rows: int = 12
+    think: bool = False
 
 
 def render_data(problem: Problem, mapping: Optional[Dict[str, str]], rows: int) -> str:
@@ -165,6 +166,9 @@ def _one_run(
         "elapsed_s": round(time.perf_counter() - started, 3),
         "emitted_target_form": (
             bool(problem.matches(output, obfuscated=obfuscated)) if not error else False
+        ),
+        "recited_target_law": (
+            bool(problem.recites(output, obfuscated=obfuscated)) if not error else False
         ),
         "error": error,
         "output": output.strip()[:400],
