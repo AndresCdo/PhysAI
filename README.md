@@ -2,7 +2,20 @@
 
 **Neuro-Symbolic Framework for Physics Equation Discovery via LLM-Guided Program Synthesis**
 
-PhysAI is an open-source research tool that combines Large Language Models (LLMs) with symbolic computation engines to discover physical equations from experimental data. Unlike traditional "generative AI" approaches, PhysAI uses the LLM as a **hypothesis generator** and Wolfram Mathematica as a **symbolic validator**, creating a rigorous feedback loop for scientific discovery.
+PhysAI is an open-source research project investigating whether a **small,
+locally-hosted** language model can contribute usable physical priors to
+equation discovery when paired with a symbolic validator. The LLM acts as a
+hypothesis generator and a computer algebra system fits and scores each
+candidate.
+
+> **Status: research proposal in development. No discovery result is claimed.**
+> The architecture is not novel — it is the one introduced by
+> [LLM-SR](https://arxiv.org/abs/2404.18400) (Shojaee et al., ICLR 2025) and
+> [In-Context Symbolic Regression](https://arxiv.org/abs/2404.19094)
+> (Merler et al., ACL SRW 2024). Dimensional analysis as a pruning step dates
+> to [AI Feynman](https://arxiv.org/abs/1905.11481) (Udrescu & Tegmark, 2019).
+> The open question this project pursues is narrower and is stated under
+> [Research agenda](#research-agenda).
 
 ## Architecture
 
@@ -87,7 +100,7 @@ with SymbolicResearcher(model='granite4:1b', config=config) as r:
 "
 ```
 
-**Expected output:**
+**Output from a previous run, retained only as a format illustration:**
 ```
 Discovery successful!
   Expression: a * Sqrt[length_m]
@@ -95,25 +108,43 @@ Discovery successful!
   Iterations: 1
 ```
 
-## Milestone 0: Rediscovering the Pendulum ✅
+That run used a prompt containing `a * Sqrt[length_m]` as a worked example, so
+it shows the output format and nothing about capability. Do not treat it as an
+expected result — see [Milestone 0](#milestone-0-pipeline-integration-check).
 
-The first benchmark demonstrates that PhysAI can rediscover the simple pendulum period formula:
+## Milestone 0: pipeline integration check
+
+The first benchmark checks that the pipeline runs end to end on the simple
+pendulum period law:
 
 **T = 2π√(L/g)**
 
-From a dataset of length vs. period measurements, the system converges to an expression proportional to `√L`.
+### This is not a discovery result
 
-### Results
+Earlier runs reported `a * Sqrt[length_m]` at R² = 1.0000 in a single
+iteration. Those numbers are not evidence of discovery, because **the answer
+was in the prompt**: seven of the eight few-shot examples in
+`physai/prompts/system_prompt.txt` used benchmark column names, and five
+reproduced a target expression verbatim, including
+`Output: a * Sqrt[length_m]` against the exact columns of
+`pendulum_simple.csv`. The prose also stated "Use Sqrt to convert Length to
+Time when needed (e.g. T ∝ √L)".
 
-| Metric | Value |
-|--------|-------|
-| Expression | `a * Sqrt[length_m]` |
-| R² | 1.0000 |
-| Iterations | 1 |
-| Fitted `a` | 2.0077 |
-| Expected `a` = 2π/√g | 2.0061 |
+The prompt has been rebuilt from problems in no evaluation set, and
+`physai/tests/test_prompt_contamination.py` fails the build if an example
+ever reuses a benchmark column or reproduces a target form again.
 
-The system correctly identifies the square root relationship and fits the parameter to within 0.08% of the theoretical value.
+The task itself is a warm-up, not a benchmark. With `g` fitted, T = 2π√(L/g)
+collapses to `T = c · L^0.5`, which is linear in log-log space and recoverable
+by ordinary least squares on two columns. It was rediscovered with a global
+optimality guarantee by
+[Austel et al. (2017)](https://arxiv.org/abs/1710.10720), and
+[Schmidt & Lipson (2009)](https://doi.org/10.1126/science.1165893) recovered
+full Lagrangians of a chaotic double pendulum from raw motion data — a
+strictly harder problem.
+
+**No re-run has been performed against the decontaminated prompt.** Until one
+is, this repository reports no discovery numbers at all.
 
 ### Run the Test
 
@@ -186,13 +217,55 @@ For more details, see [AGENTS.md](AGENTS.md) - Technical Notes section.
 
 ## Milestones
 
+Every milestone below was previously marked complete on the strength of runs
+whose prompt contained the answer. They are integration checks — evidence that
+the pipeline is wired correctly — and all of them need re-running against the
+decontaminated prompt before any number is reported.
+
 | Milestone | Description | Status |
 |-----------|-------------|--------|
-| 0 | Rediscover T = 2π√(L/g) from pendulum data | ✅ Complete |
-| 1 | Damped pendulum: A = a × √L × e^(-bt) | ✅ Complete |
-| 2a | Horizontal drag: x = a × v₀ × (1 - e^(-bt)) | ✅ Complete |
-| 2b | 2D projectile: R = a × v₀² × sin(2θ) | ✅ Complete |
-| 3 | 1D quantum well: E = a × n² / L² | ✅ Complete |
+| 0 | T = 2π√(L/g) from pendulum data | ⚠️ Needs re-run (prompt was contaminated) |
+| 1 | Damped pendulum: A = a × √L × e^(-bt) | ⚠️ Needs re-run (prompt was contaminated) |
+| 2a | Horizontal drag: x = a × v₀ × (1 - e^(-bt)) | ⚠️ Needs re-run; dataset defect ([#10](https://github.com/AndresCdo/PhysAI/issues/10)) |
+| 2b | 2D projectile: R = a × v₀² × sin(2θ) | ⚠️ Needs re-run (prompt was contaminated) |
+| 3 | 1D quantum well: E = a × n² / L² | ⚠️ Needs re-run (prompt was contaminated) |
+
+### Known defects in the validation path
+
+Three components that should have constrained the search do not, so none of
+them could have influenced the results above:
+
+| Issue | Defect |
+|---|---|
+| [#12](https://github.com/AndresCdo/PhysAI/issues/12) | The dimensional guardrail never compares against `target_unit`, and returns "sound" on any kernel exception |
+| [#13](https://github.com/AndresCdo/PhysAI/issues/13) | The refinement loop computes feedback and never passes it to the generator |
+| [#15](https://github.com/AndresCdo/PhysAI/issues/15) | The pre-flight validity gate computes unrecognised Wolfram heads and discards the result |
+| [#10](https://github.com/AndresCdo/PhysAI/issues/10) | `projectile_horizontal_drag.csv` deviates up to 33.8% from its own documented model |
+
+## Research agenda
+
+The question worth asking is not whether this pipeline recovers textbook
+equations — a two-column least-squares fit does that. It is:
+
+**Does a small locally-hosted model contribute any usable physical prior, or
+does the symbolic validator do all the work?**
+
+Answering it requires controls this repository does not yet have:
+
+1. **Decontaminated prompt** — done; enforced by a test.
+2. **Blind-data control** — run the system with the problem description and
+   variable names but no data rows. If it still emits the target, the data,
+   the fitter and the CAS contributed nothing.
+3. **Component ablation** — disable the dimensional check, the syntax gate and
+   the feedback loop independently and measure the difference. Given #12, #13
+   and #15, the current expectation is no difference at all.
+4. **Published benchmark** — the five hand-made CSVs here hold 17 to 49 rows
+   and are not reproducible from the repository's own generator. Evaluation
+   belongs on an established set with an established protocol.
+5. **Seeded, repeated runs** — a single run is not a measurement. Model tag and
+   digest, quantisation, decoding parameters and seed must be recorded.
+
+A negative answer is a publishable result and the most likely one.
 
 ## Contributing
 
