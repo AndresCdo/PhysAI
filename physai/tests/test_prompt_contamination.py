@@ -20,15 +20,36 @@ EXAMPLE_PATTERN = re.compile(
     r"### Example (\d+)\s*\nTarget:\s*(\S+).*?\nInputs:\s*(.*?)\nOutput:\s*(.*)"
 )
 
-# Functional forms the evaluation sets ask the system to recover, normalised to
-# bare operator sequences. An example matching one of these hands over the
-# answer even when it uses different variable names.
+
+def normalise(expression: str) -> str:
+    """Reduce an expression to a syntax-independent form before matching.
+
+    The forbidden-form patterns below must keep working if the candidate
+    language changes. Written against Wolfram syntax alone they go blind the
+    moment the same expression arrives as `a * sqrt(x)` instead of
+    `a * Sqrt[x]`, which would silently retire the guard. Normalising folds
+    both dialects — and any future one with the same operators — onto one
+    spelling.
+    """
+    text = expression.strip()
+    text = text.replace("[", "(").replace("]", ")")  # Wolfram calls -> Python calls
+    text = text.replace("**", "^")  # Python powers -> one spelling
+    text = re.sub(r"\s+", " ", text)
+    # Function names are case-insensitive across the dialects we accept.
+    for name in ("sqrt", "exp", "sin", "cos", "tan", "log"):
+        text = re.sub(name, name, text, flags=re.IGNORECASE)
+    return text.lower()
+
+
+# Functional forms the evaluation sets ask the system to recover, matched
+# against normalise() output. An example matching one of these hands over the
+# answer even when it uses different variable names or a different dialect.
 FORBIDDEN_FORMS = {
-    "sqrt-of-single-input": re.compile(r"^a\s*\*\s*Sqrt\[\s*\w+\s*\]$"),
-    "sqrt-times-decay": re.compile(r"Sqrt\[\s*\w+\s*\]\s*\*\s*Exp\[\s*-"),
-    "saturating-exponential": re.compile(r"\(\s*1\s*-\s*Exp\[\s*-"),
-    "range-with-double-angle": re.compile(r"Sin\[\s*2\s*\*"),
-    "inverse-square-quantum": re.compile(r"\w+\^2\s*/\s*\w+\^2"),
+    "sqrt-of-single-input": re.compile(r"^a \* sqrt\( ?\w+ ?\)$"),
+    "sqrt-times-decay": re.compile(r"sqrt\( ?\w+ ?\) \* exp\( ?-"),
+    "saturating-exponential": re.compile(r"\( ?1 - exp\( ?-"),
+    "range-with-double-angle": re.compile(r"sin\( ?2 \*"),
+    "inverse-square-quantum": re.compile(r"\w+\^2 ?/ ?\w+\^2"),
 }
 
 
@@ -85,12 +106,45 @@ def test_no_example_reproduces_an_evaluation_form(label, pattern):
     offenders = [
         f"Example {number}: {output}"
         for number, _, _, output in parse_examples()
-        if pattern.search(output)
+        if pattern.search(normalise(output))
     ]
 
     assert not offenders, (
         f"Few-shot examples reproduce the '{label}' evaluation form:\n  "
         + "\n  ".join(offenders)
+    )
+
+
+# The five evaluation answers, written in each dialect the project may emit.
+# Wolfram is what the prompt used; SymPy is what a move off the Wolfram kernel
+# would produce. Both must be caught, or switching dialect retires the guard.
+KNOWN_ANSWERS = [
+    ("wolfram", "a * Sqrt[length_m]"),
+    ("wolfram", "a * Sqrt[length_m] * Exp[-b * time_s]"),
+    ("wolfram", "a * velocity_m_s * (1 - Exp[-b * time_s])"),
+    ("wolfram", "a * velocity_m_s^2 * Sin[2 * angle_deg * Pi / 180]"),
+    ("wolfram", "a * quantum_number_n^2 / well_width_nm^2"),
+    ("sympy", "a * sqrt(length_m)"),
+    ("sympy", "a * sqrt(length_m) * exp(-b * time_s)"),
+    ("sympy", "a * velocity_m_s * (1 - exp(-b * time_s))"),
+    ("sympy", "a * velocity_m_s**2 * sin(2 * angle_deg * pi / 180)"),
+    ("sympy", "a * quantum_number_n**2 / well_width_nm**2"),
+]
+
+
+@pytest.mark.parametrize("dialect,answer", KNOWN_ANSWERS)
+def test_guard_catches_known_answers_in_any_dialect(dialect, answer):
+    """The guard must not depend on which expression language is in use."""
+    matched = [
+        label
+        for label, pattern in FORBIDDEN_FORMS.items()
+        if pattern.search(normalise(answer))
+    ]
+
+    assert matched, (
+        f"A known evaluation answer written in {dialect} syntax passes every "
+        f"forbidden-form pattern: {answer!r} normalises to "
+        f"{normalise(answer)!r}. The guard is blind to this dialect."
     )
 
 
