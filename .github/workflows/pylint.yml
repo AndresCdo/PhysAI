@@ -1,23 +1,53 @@
 name: Pylint
 
-on: [push]
+on:
+  push:
+    branches: [ "main", "dev" ]
+  pull_request:
+    branches: [ "main", "dev" ]
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  pylint:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.8", "3.9", "3.10"]
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - uses: actions/checkout@v4
+
+    # Linting is not version-specific here, so it runs once. The Python version
+    # the code must remain compatible with is pinned as py-version in .pylintrc,
+    # and the test matrix in tests.yml covers the supported interpreters.
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: "3.11"
+        cache: pip
+        cache-dependency-path: |
+          requirements.txt
+          requirements-dev.txt
+
     - name: Install dependencies
+      # The project dependencies are required, not just pylint. Without them
+      # pylint cannot resolve numpy, pandas or wolframclient and reports
+      # import-error for each, which is noise rather than a finding.
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
-    - name: Analysing the code with pylint
+        pip install -r requirements.txt -r requirements-dev.txt
+
+    # pylint reads exactly one rcfile per run and has no per-file-ignores, and
+    # a nested physai/tests/.pylintrc is silently ignored when linting from the
+    # repository root. Two invocations sharing the root .pylintrc is the only
+    # way to relax test-only conventions without duplicating the config.
+    - name: Analysing the library with pylint
+      run: pylint $(git ls-files '*.py' | grep -v '^physai/tests/')
+
+    - name: Analysing the tests with pylint
+      # Relaxations that apply to test code only: pytest passes fixtures as
+      # parameters that shadow the fixture function (redefined-outer-name),
+      # test names are the documentation (missing-function-docstring), test
+      # classes are namespaces (too-few-public-methods), and heavy imports are
+      # deliberately deferred into test bodies (import-outside-toplevel).
       run: |
-        pylint $(git ls-files '*.py')
+        pylint $(git ls-files 'physai/tests/*.py') \
+          --disable=redefined-outer-name,missing-function-docstring,missing-class-docstring,too-few-public-methods,import-outside-toplevel
