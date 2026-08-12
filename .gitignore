@@ -153,3 +153,5 @@ cython_debug/
 *file_logger.txt
 latex_documents
 data
+!physai/data/
+!physai/data/benchmarks/

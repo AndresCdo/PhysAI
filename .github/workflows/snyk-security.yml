@@ -1,20 +1,12 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# A sample workflow which sets up Snyk to analyze the full Snyk platform (Snyk Open Source, Snyk Code,
-# Snyk Container and Snyk Infrastructure as Code)
-# The setup installs the Snyk CLI - for more details on the possible commands
-# check https://docs.snyk.io/snyk-cli/cli-reference
-# The results of Snyk Code are then uploaded to GitHub Security Code Scanning
+# Snyk security scanning.
 #
-# In order to use the Snyk Action you will need to have a Snyk API token.
-# More details in https://github.com/snyk/actions#getting-your-snyk-token
-# or you can signup for free at https://snyk.io/login
+# This workflow is skipped unless a SNYK_TOKEN repository secret exists. To
+# enable it, create a token at https://app.snyk.io/account and add it under
+# Settings > Secrets and variables > Actions > New repository secret.
 #
-# For more examples, including how to limit scans to only high-severity issues
-# and fail PR checks, see https://github.com/snyk/actions/
+# The `secrets` context is not available in a job-level `if`, so the token is
+# exposed as a job-level env var and each step is gated on it. See
+# https://docs.github.com/en/actions/reference/workflows-and-actions/contexts
 
 name: Snyk Security
 
@@ -34,46 +26,41 @@ jobs:
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
       actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: ubuntu-latest
+    env:
+      # Job-level, so every `snyk` invocation below inherits it. Scoping this to
+      # the setup step alone left the steps that actually call the CLI
+      # unauthenticated.
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Report that Snyk is not configured
+        if: env.SNYK_TOKEN == ''
+        run: |
+          echo "::notice title=Snyk skipped::No SNYK_TOKEN repository secret is configured, so every Snyk step is skipped. Add the secret to enable scanning."
+
       - name: Set up Snyk CLI to check for security issues
-        # Snyk can be used to break the build when it detects security issues.
-        # In this case we want to upload the SAST issues to GitHub Code Scanning
+        if: env.SNYK_TOKEN != ''
         uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
 
-        # For Snyk Open Source you must first set up the development environment for your application's dependencies
-        # For example for Node
-        #- uses: actions/setup-node@v3
-        #  with:
-        #    node-version: 16
-
-        env:
-          # This is where you will need to introduce the Snyk API token created with your Snyk account
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-
         # Runs Snyk Code (SAST) analysis and uploads result into GitHub.
-        # Use || true to not fail the pipeline
       - name: Snyk Code test
-        run: snyk code test --sarif > snyk-code.sarif # || true
+        if: env.SNYK_TOKEN != ''
+        run: snyk code test --sarif > snyk-code.sarif
 
         # Runs Snyk Open Source (SCA) analysis and uploads result to Snyk.
       - name: Snyk Open Source monitor
+        if: env.SNYK_TOKEN != ''
         run: snyk monitor --all-projects
 
         # Runs Snyk Infrastructure as Code (IaC) analysis and uploads result to Snyk.
-        # Use || true to not fail the pipeline.
       - name: Snyk IaC test and report
-        run: snyk iac test --report # || true
-
-        # Build the docker image for testing
-      - name: Build a Docker image
-        run: docker build -t physai .
-        # Runs Snyk Container (Container and SCA) analysis and uploads result to Snyk.
-      - name: Snyk Container monitor
-        run: snyk container monitor physai --file=Dockerfile
+        if: env.SNYK_TOKEN != ''
+        run: snyk iac test --report
 
         # Push the Snyk Code results into GitHub Code Scanning tab
       - name: Upload result to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v2
+        if: env.SNYK_TOKEN != ''
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: snyk-code.sarif

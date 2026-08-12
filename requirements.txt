@@ -1,7 +1,24 @@
-arxiv
-numpy
-tensorflow
-transformers
-pylatexenc
-keras-preprocessing
-PyPDF2
+# Core dependencies for PhysAI Neuro-Symbolic Engine
+# Install with: pip install -r requirements.txt
+
+# Data processing
+numpy>=1.19.0
+pandas>=2.0.0
+
+# LLM Interface (Ollama)
+ollama>=0.1.0
+
+# Wolfram Interface (optional - requires Wolfram Engine license)
+wolframclient>=1.1.0
+
+# LaTeX utilities
+pylatexenc>=2.10
+
+# ArXiv data collection (optional)
+arxiv>=2.0.0
+
+# PDF processing (optional)
+PyPDF2>=3.0.0
+
+# Development dependencies live in requirements-dev.txt:
+#   pip install -r requirements.txt -r requirements-dev.txt

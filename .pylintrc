@@ -1,0 +1,213 @@
+# .pylintrc - PhysAI static-analysis policy
+# ===========================================================================
+# SCOPE: this file configures the LIBRARY pass only. Test-only relaxations are
+# deliberately NOT here. pylint reads exactly one rcfile per run and a nested
+# physai/tests/.pylintrc is SILENTLY IGNORED when linting from the repository
+# root, so the test relaxations are applied as a second, per-directory pylint
+# invocation in .github/workflows/pylint.yml. See the TESTS PASS note at the
+# bottom of this file.
+#
+# GOVERNING RULE: a check is disabled globally only when the CHECK'S PREMISE is
+# wrong for this codebase - never merely because the code is untidy and never
+# to make a red build green. Checks that point at real functions carry a
+# scoped `# pylint: disable=` comment at the site instead, so the exemption
+# stays attached to the code it excuses and is greppable.
+# ===========================================================================
+
+[MAIN]
+
+# Match setup.py python_requires=">=3.9". The lint job runs on a single modern
+# interpreter (3.11); this is what keeps pylint reasoning about the OLDEST
+# supported Python instead of the runner's, and is why the lint workflow needs
+# no version matrix. The interpreter matrix lives in tests.yml, where it
+# actually changes behaviour.
+py-version=3.9
+
+# Use all available cores. This is safe ONLY because duplicate-code (R0801) is
+# disabled below - R0801 results are non-deterministic under jobs > 1.
+# If R0801 is ever re-enabled, set jobs=1 in the same commit.
+jobs=0
+
+# TEMPORARY QUARANTINE - delete this line together with the file.
+# physai/algorithms/equation_generator.py is 2023 GPT-2-era code that
+# physai/__init__.py itself labels "Legacy Components (deprecated)". Its only
+# unresolvable import is `transformers`, declared in no manifest. We
+# deliberately do NOT add it: that would attach a multi-gigabyte torch stack to
+# a package whose real LLM path is Ollama.
+# This quarantines ONE legacy file. import-error (E0401) stays fully ENABLED
+# everywhere else - it is the check that caught the genuine packaging bug
+# (physai/algorithms/__init__.py and physai/latex/latex_generator.py imported
+# this module unconditionally, so `import physai.latex` raised ImportError on
+# every install), and that bug is fixed in code, not suppressed here.
+# TODO: delete physai/algorithms/equation_generator.py and drop this setting.
+ignore-paths=^physai/algorithms/equation_generator\.py$
+
+
+[MESSAGES CONTROL]
+
+# --- Rationale for every global disable ------------------------------------
+#
+# R0801 duplicate-code
+#   Mechanically unusable, independent of the finding. The single hit is ~9
+#   lines of ResearcherConfig/SymbolicResearcher setup shared by
+#   test_milestone_2.py and test_milestone_3.py, but pylint attributes the
+#   message to setup.py:1 - a file containing neither copy - so it cannot be
+#   suppressed inline at either real site, and its output is unstable under
+#   parallel jobs. The duplication itself is removed by moving the benchmark
+#   fixtures into physai/tests/conftest.py (see code fixes).
+#
+# R0903 too-few-public-methods
+#   4 of 6 hits are pytest class namespaces holding a single test method; the
+#   other 2 (DataCollector, LatexGenerator) are deliberate single-entrypoint
+#   facades. The premise "a class needs >= 2 public methods to justify itself"
+#   is false for both shapes.
+#
+# R0902 too-many-instance-attributes
+#   Both hits are @dataclass records at 8/7: ResearcherConfig (8 tuning knobs)
+#   and DiscoveryResult (8 result fields). pylint counts dataclass fields as
+#   instance attributes and has no dataclass exemption, so the check is
+#   literally counting the fields of a config record. No invariant spans them.
+#
+# R0913 too-many-arguments
+#   One hit: SymbolicResearcher.discover at 6/5, where every parameter is
+#   domain-meaningful. The useful half of this signal is KEPT: R0917
+#   (too-many-positional-arguments) stays enabled and is resolved properly, by
+#   making the three optional metadata parameters keyword-only with `*`.
+#   Note README.md and AGENTS.md show `discover('data.csv', target=..., ...)`,
+#   so a 4th positional would silently bind to target_unit - the `*` fix
+#   closes that, a blanket disable of both checks would not.
+#
+# W1203 logging-fstring-interpolation
+#   All 24 hits are in researcher.py / llm_interface.py / wolfram_evaluator.py
+#   - the three modules with NO executing test coverage (every discover() call
+#   site in the repo is @pytest.mark.skip), so 24 hand edits inside except
+#   handlers could not be verified by the suite that is supposed to gate them.
+#   The benefit is also currently nil: grep confirms no basicConfig /
+#   StreamHandler / Formatter / dictConfig anywhere under physai/, so nothing
+#   consumes record.args.
+#   RE-ENABLE THIS the moment structured logging (JSON sink, Sentry, or any
+#   handler that groups on the raw message) is introduced.
+#
+# NOT disabled globally, on purpose - each of these sits on a live defect and
+# is instead handled by a code fix plus, where genuinely justified, a scoped
+# comment at the exact line:
+#   W0718 broad-exception-caught  (3 of 10 guard fail-open `return True, ""`
+#                                  in the dimensional/syntax validation path)
+#   C0415 import-outside-toplevel (its stated fallback W0404 fires exactly
+#                                  once and cannot cover the other 3 bad
+#                                  library-level lazy imports)
+#   R0911/R0912/R0914/R0915       (R0912's two hits are caused BY dead code -
+#                                  deleting it drops both to 12 branches and
+#                                  the message disappears with no suppression)
+#   E0401, W0611, W0612, W0613    (each maps to a reproducible bug)
+# ---------------------------------------------------------------------------
+disable=
+    duplicate-code,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    too-many-arguments,
+    logging-fstring-interpolation
+
+
+[BASIC]
+
+# --- Physics notation is a naming POLICY, not a suppression ----------------
+# Equation-transcription code must read like the equation. In
+# physai/data/benchmarks/generate_benchmarks.py the flagged names are function
+# locals carrying the symbols of T = 2*pi*sqrt(L/g) and I = V/R (verified:
+# `for L in lengths:`, `T_theoretical`, `T_noisy`, `for V in voltages:`,
+# `for R in resistances:`, `I_theoretical`, `I_noisy`). Renaming L to `length`
+# destroys the correspondence between the code and the physics it transcribes.
+# PEP 8 explicitly permits deviating from snake_case for code following an
+# existing mathematical convention; numpy and scipy do exactly this.
+#
+# The allowance is SCOPED to local variables and arguments. It is deliberately
+# NOT expressed with good-names-rgxs, which applies to every name category and
+# would additionally bless `I` as a module-level constant, `Do_thing` as a
+# function, and single capitals - several of which (I, E, N, D, C, K) are
+# Wolfram reserved builtins - as legal names in the layer that interpolates
+# Python names straight into kernel queries.
+#
+# Alternatives, in order:
+#   _?[a-z][a-z0-9_]*             normal snake_case, any length (g, df, r2_threshold)
+#   __[a-z][a-z0-9_]+__           dunder locals
+#   [A-Z][a-z0-9]?(_[a-z0-9]+)*   physics symbols: L V R T I E, Ex, Bz, Re,
+#                                 T_0, T_theoretical, I_noisy
+# It does NOT match CamelCase (`Result`, `Foo`, `MyVar`), so the check keeps
+# its teeth. Verify with: pylint --variable-rgx=... physai/data/benchmarks/
+variable-rgx=^(_?[a-z][a-z0-9_]*|__[a-z][a-z0-9_]+__|[A-Z][a-z0-9]?(_[a-z0-9]+)*)$
+argument-rgx=^(_?[a-z][a-z0-9_]*|[A-Z][a-z0-9]?(_[a-z0-9]+)*)$
+
+# const-rgx, class-rgx, function-rgx, method-rgx and attr-rgx are left at their
+# defaults ON PURPOSE. Module-level constants stay strictly UPPER_CASE, which
+# is what keeps the four remaining invalid-name hits visible: pendulum_path,
+# freefall_path, ohms_path (generate_benchmarks.py) and search_query
+# (data_processing/data_collector.py) are script locals sitting in a bare
+# `if __name__ == "__main__":` block, so pylint correctly reads them as module
+# constants. They are fixed by wrapping each script body in `def main():` -
+# which also makes both modules importable and testable - not by relaxing the
+# constant rule.
+
+
+[FORMAT]
+
+# pylint's default, stated explicitly so a pylint upgrade cannot move it.
+# Only 3 lines exceed it (105 / 122 / 107) and all three are string literals
+# fixed by implicit concatenation, so there is no reason to raise the limit.
+# Leaves headroom over black's 88 for the long Wolfram query strings, which no
+# formatter splits.
+# NOTE: do NOT put a `# pylint: disable=line-too-long` on
+# physai/core/llm_interface.py:95 - that line OPENS a triple-quoted literal, so
+# the pragma text would be appended to the system prompt actually sent to the
+# model. Split it into adjacent string literals instead.
+max-line-length=100
+
+
+[EXCEPTIONS]
+
+# Default. broad-exception-caught (W0718) stays ENABLED because three of its
+# ten hits guard fail-open returns in the validation path
+# (`except Exception: ... return True, ""` at wolfram_evaluator.py:215,
+# researcher.py:356 and researcher.py:389) - exactly the bug class this check
+# exists to surface. The four legitimate process-boundary catches carry a
+# scoped `# pylint: disable=broad-exception-caught` comment at the site.
+overgeneral-exceptions=builtins.BaseException,builtins.Exception
+
+
+[REPORTS]
+
+score=yes
+
+# ===========================================================================
+# TESTS PASS - not configurable from this file
+#
+# .github/workflows/pylint.yml lints physai/tests/ in a second invocation that
+# reuses THIS rcfile and adds only:
+#
+#   --disable=missing-function-docstring,redefined-outer-name,
+#             protected-access,import-outside-toplevel
+#
+# Why each is test-only (all verified against the report):
+#   missing-function-docstring - all 34 hits are inside physai/tests/, zero
+#       outside, so library code keeps the requirement. A pytest function's
+#       name plus its assertions are its documentation.
+#   redefined-outer-name - 22 of 24 hits are fixture injection; a fixture
+#       parameter MUST be spelled like the fixture function or pytest cannot
+#       inject it. The 2 library hits are fixed in code, not suppressed.
+#   protected-access - white-box assertions on internals are what tests are
+#       for. The 1 library hit is fixed by adding a public API.
+#   import-outside-toplevel - importing pandas/numpy inside test bodies keeps
+#       collection working when an optional dependency is absent.
+#
+# Everything else stays ENABLED in tests, deliberately - notably
+# unused-variable and unused-import. Several of those hits are dropped
+# assertions (test_milestone_1.py computes a_expected = 2*pi/sqrt(g) and
+# b_expected under a comment claiming to verify the pendulum formula and
+# asserts on neither; test_milestone_2.py computes has_exp_form and never
+# asserts it). Exempting tests would hide them permanently.
+#
+# Do NOT replace the deferred imports in test_milestone_0.py with a
+# module-scope pytest.importorskip("wolframclient"): that skips the ENTIRE
+# module, and test_milestone_0.py holds all 34 executable unit tests in the
+# repository while wolframclient is only an extras_require entry.
+# ===========================================================================
