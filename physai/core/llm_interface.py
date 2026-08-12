@@ -1,10 +1,8 @@
 """Ollama LLM interface for hypothesis generation."""
 
 import logging
-import os
 from pathlib import Path
-from string import Template
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Any
 
 from physai.core.types import Variable, Attempt
 from physai.utils.feedback import (
@@ -21,19 +19,13 @@ SYSTEM_PROMPT_PATH = Path(__file__).parent.parent / "prompts" / "system_prompt.t
 class OllamaInterfaceError(Exception):
     """Base exception for OllamaInterface errors."""
 
-    pass
-
 
 class OllamaConnectionError(OllamaInterfaceError):
     """Raised when connection to Ollama server fails."""
 
-    pass
-
 
 class OllamaGenerationError(OllamaInterfaceError):
     """Raised when generation fails."""
-
-    pass
 
 
 class OllamaInterface:
@@ -92,6 +84,9 @@ class OllamaInterface:
 
     def _get_default_system_prompt(self) -> str:
         """Return a minimal default system prompt."""
+        # The long line below is prompt text sent verbatim to the model.
+        # Wrapping it would insert a newline into the prompt.
+        # pylint: disable=line-too-long
         return """You are a Physics Equation Synthesizer. Output ONLY valid Wolfram Language expressions.
 No markdown. No explanation. Just the expression.
 
@@ -107,7 +102,8 @@ Output: a * Sqrt[length]
             return self._client
 
         try:
-            import ollama
+            # optional backend: ollama is imported lazily so the module loads without it
+            import ollama  # pylint: disable=import-outside-toplevel
 
             self._client = ollama.Client(host=self.base_url)
             return self._client
@@ -127,7 +123,8 @@ Output: a * Sqrt[length]
             client = self._ensure_client()
             client.list()
             return True
-        except Exception as e:
+        # foreign boundary: the ollama client raises httpx types this package does not depend on
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Failed to connect to Ollama: {e}")
             return False
 
@@ -144,7 +141,8 @@ Output: a * Sqrt[length]
             return [
                 m.get("model", m.get("name", "")) for m in response.get("models", [])
             ]
-        except Exception as e:
+        # foreign boundary: the ollama client raises httpx types this package does not depend on
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Failed to list models: {e}")
             return []
 

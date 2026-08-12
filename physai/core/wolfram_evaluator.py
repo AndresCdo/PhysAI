@@ -1,13 +1,12 @@
 """Wolfram Language evaluator with guardrails for PhysAI."""
 
 import logging
-import os
+import re
 from typing import Dict, List, Optional, Tuple, Any
 
 import pandas as pd
 
-from physai.core.types import FitResult, Variable, UnitDimension
-from physai.core.constants import get_unit_dimension, normalize_unit
+from physai.core.types import FitResult
 from physai.utils.serialization import data_to_wolfram_string, variable_to_wolfram_unit
 from physai.utils.parsing import is_valid_expression
 
@@ -17,31 +16,21 @@ logger = logging.getLogger(__name__)
 class WolframEvaluatorError(Exception):
     """Base exception for WolframEvaluator errors."""
 
-    pass
-
 
 class WolframConnectionError(WolframEvaluatorError):
     """Raised when connection to Wolfram Kernel fails."""
-
-    pass
 
 
 class WolframSyntaxError(WolframEvaluatorError):
     """Raised when expression has invalid syntax."""
 
-    pass
-
 
 class WolframDimensionError(WolframEvaluatorError):
     """Raised when expression has dimensional inconsistency."""
 
-    pass
-
 
 class WolframFitError(WolframEvaluatorError):
     """Raised when fitting operation fails."""
-
-    pass
 
 
 class WolframEvaluator:
@@ -92,6 +81,9 @@ class WolframEvaluator:
             return
 
         try:
+            # optional backend: wolframclient is an extras_require entry and
+            # needs a licensed kernel, so it is imported lazily.
+            # pylint: disable=import-outside-toplevel
             from wolframclient.evaluation import WolframLanguageSession
             from wolframclient.language import wl
         except ImportError as e:
@@ -118,7 +110,8 @@ class WolframEvaluator:
             try:
                 self._session.stop()
                 logger.info("Wolfram Kernel session closed")
-            except Exception as e:
+            # foreign boundary: wolframclient surfaces undocumented types from a subprocess link
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.warning(f"Error closing Wolfram session: {e}")
             finally:
                 self._session = None
@@ -164,11 +157,14 @@ class WolframEvaluator:
             error_pos = self._evaluate_safe(error_query)
             return False, f"Syntax error near position {error_pos}"
 
-        except Exception as e:
+        # foreign boundary: wolframclient surfaces undocumented types from a
+        # subprocess link. Fails closed - a kernel error rejects the expression.
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return False, f"Syntax check failed: {e}"
 
     def is_dimensionally_sound(
-        self, expression: str, target_unit: str, input_units: Dict[str, str]
+        # target_unit is never compared against. See issue #12
+        self, expression: str, target_unit: str, input_units: Dict[str, str]  # pylint: disable=unused-argument
     ) -> Tuple[bool, str]:
         """
         Check if expression has correct dimensional output.
@@ -212,10 +208,14 @@ class WolframEvaluator:
 
             return True, ""
 
-        except Exception as e:
+        # FAILS OPEN: reports success on kernel error. See issue #12
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning(f"Dimension check failed: {e}")
             return True, ""
 
+    # One statistical fit assembled from many named intermediates; naming them
+    # is what makes the metric computation readable.
+    # pylint: disable=too-many-locals
     def fit_and_score(
         self,
         expression: str,
@@ -246,7 +246,8 @@ class WolframEvaluator:
         Raises:
             WolframFitError: If fitting fails to converge or encounters errors
         """
-        from physai.utils.parsing import extract_parameters
+        # deferred to avoid a circular import with physai.utils.parsing
+        from physai.utils.parsing import extract_parameters  # pylint: disable=import-outside-toplevel
 
         self._ensure_connection()
 
@@ -263,8 +264,6 @@ class WolframEvaluator:
         # Replace variable names in expression
         expression_wl = expression
         for orig, wl in var_map.items():
-            import re
-
             expression_wl = re.sub(r"\b" + re.escape(orig) + r"\b", wl, expression_wl)
 
         input_variables_wl = [var_map[v] for v in input_variables]
@@ -364,15 +363,18 @@ class WolframEvaluator:
             logger.error(f"Wolfram evaluation error: {e}")
             raise
 
+    # Dispatch table mapping Wolfram's type system onto Python's; a guarded
+    # early return per type is the clearest form.
+    # pylint: disable=too-many-return-statements
     def _convert_result(self, result: Any) -> Any:
         """Convert Wolfram result to Python native types."""
         if hasattr(result, "name"):
             str_result = str(result.name)
             if str_result == "True":
                 return True
-            elif str_result == "False":
+            if str_result == "False":
                 return False
-            elif str_result == "Null":
+            if str_result == "Null":
                 return None
             try:
                 if "." in str_result:
@@ -424,5 +426,6 @@ class WolframEvaluator:
         if self._session is not None:
             try:
                 self._session.evaluate('ClearAll["Global`*"]')
-            except Exception as e:
+            # teardown must not mask an exception already propagating
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 logger.warning(f"Failed to clear state: {e}")

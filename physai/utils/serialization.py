@@ -1,6 +1,6 @@
 """Data serialization utilities for Wolfram Language compatibility."""
 
-from typing import List, Union
+from typing import List
 import pandas as pd
 import numpy as np
 
@@ -60,7 +60,8 @@ def data_to_wolfram(df: pd.DataFrame):
         ValueError: If DataFrame contains non-numeric data
     """
     try:
-        from wolframclient.language import wl
+        # optional backend: wolframclient is an extras_require entry needing a licensed kernel
+        from wolframclient.language import wl  # pylint: disable=import-outside-toplevel
     except ImportError as e:
         raise ImportError(
             "wolframclient is required for data_to_wolfram(). "

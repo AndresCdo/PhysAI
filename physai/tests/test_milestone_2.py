@@ -1,6 +1,5 @@
 """Tests for PhysAI Milestone 2: Projectile Motion with Drag."""
 
-import math
 from pathlib import Path
 
 import pytest
@@ -82,7 +81,6 @@ class TestHorizontalDragDataset:
         # For a fixed velocity, check that distance growth slows
         for velocity in df["velocity_m_s"].unique()[:2]:
             subset = df[df["velocity_m_s"] == velocity].sort_values("time_s")
-            times = subset["time_s"].values
             distances = subset["distance_m"].values
 
             # Calculate incremental distance per time unit
@@ -196,11 +194,9 @@ class TestMilestone2aIntegration:
 
             assert result.best_expression is not None
 
-            # Should contain Exp for the drag term
+            # Should contain Exp for the drag term. The (1 - ...) form is not
+            # asserted; see issue #10.
             has_exp = "Exp" in result.best_expression
-            has_exp_form = (
-                "1 -" in result.best_expression or "(1-" in result.best_expression
-            )
 
             assert has_exp, (
                 f"Expected exponential decay Exp[-b*t], got: {result.best_expression}"

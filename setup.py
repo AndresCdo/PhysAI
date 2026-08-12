@@ -1,3 +1,5 @@
+"""Packaging configuration for PhysAI."""
+
 from setuptools import find_packages, setup
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -8,7 +10,10 @@ setup(
     version="0.1.0",
     author="Andres Caicedo",
     author_email="andres.felipe.caicedo.ultengo@outlook.com",
-    description="Neuro-Symbolic framework for physics equation discovery via LLM-guided program synthesis",
+    description=(
+        "Neuro-Symbolic framework for physics equation discovery "
+        "via LLM-guided program synthesis"
+    ),
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/AndresCdo/PhysAI.git",

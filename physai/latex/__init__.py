@@ -14,4 +14,3 @@ __all__ = [
     "wrap_in_align_environment",
     "label_equation",
 ]
-

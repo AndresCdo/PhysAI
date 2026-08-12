@@ -34,10 +34,11 @@ class LatexGenerator:
         try:
             with open(template_path, "r", encoding="utf-8") as template_file:
                 template_content = template_file.read()
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             raise FileNotFoundError(
-                f"LaTeX template file not found at '{template_path}'. Please ensure 'latex_document_template.tex' exists."
-            )
+                f"LaTeX template file not found at '{template_path}'. "
+                "Please ensure 'latex_document_template.tex' exists."
+            ) from exc
 
         equations_section = "\\section{Generated Equations}\n"
 

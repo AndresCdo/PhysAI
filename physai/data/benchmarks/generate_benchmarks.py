@@ -60,7 +60,7 @@ def generate_pendulum_dataset(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(rows))
 
     return str(path)
@@ -100,7 +100,7 @@ def generate_freefall_dataset(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(rows))
 
     return str(path)
@@ -143,13 +143,14 @@ def generate_ohms_law_dataset(
     path = Path(output_path)
     path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(rows))
 
     return str(path)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Generate every benchmark dataset next to this script."""
     benchmarks_dir = Path(__file__).parent
 
     print("Generating benchmark datasets...")
@@ -170,3 +171,7 @@ if __name__ == "__main__":
     print(f"  Created: {ohms_path}")
 
     print("Done!")
+
+
+if __name__ == "__main__":
+    main()

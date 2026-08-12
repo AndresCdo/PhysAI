@@ -1,11 +1,9 @@
 """Tests for PhysAI Milestone 1: Damped Pendulum."""
 
-import math
 from pathlib import Path
 
 import pytest
 
-from physai.core.types import Variable, FitResult, DiscoveryResult
 from physai.core.researcher import SymbolicResearcher, ResearcherConfig
 
 
@@ -37,21 +35,16 @@ class TestDampedPendulumData:
     def test_dataset_values(self, damped_pendulum_path):
         """Verify the dataset follows the expected formula."""
         import pandas as pd
-        import numpy as np
-
         df = pd.read_csv(damped_pendulum_path)
 
         # Expected formula: A = a * sqrt(L) * exp(-b*t)
-        # where a ≈ 2π/√g ≈ 2.006 and b ≈ 0.05
-        g = 9.81
-        a_expected = 2 * math.pi / math.sqrt(g)
-        b_expected = 0.05
+        # where a ≈ 2π/√g ≈ 2.006 and b ≈ 0.05. Those constants are not
+        # asserted here; see issue #10.
 
         # Check that amplitude decreases with time for same length
         for length in df["length_m"].unique():
             subset = df[df["length_m"] == length].sort_values("time_s")
             amplitudes = subset["amplitude_m"].values
-            times = subset["time_s"].values
 
             # Amplitude should decrease with time
             for i in range(len(amplitudes) - 1):
@@ -73,7 +66,9 @@ class TestDampedPendulumData:
         # Check amplitude increases with length
         for i in range(len(amplitudes) - 1):
             assert amplitudes[i] < amplitudes[i + 1], (
-                f"Amplitude at t=0 should increase with length"
+                f"Amplitude at t=0 should increase with length: "
+                f"L={lengths[i]} gives {amplitudes[i]}, "
+                f"L={lengths[i + 1]} gives {amplitudes[i + 1]}"
             )
 
 

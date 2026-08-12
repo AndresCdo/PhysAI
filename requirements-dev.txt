@@ -8,3 +8,6 @@ pytest-cov>=3.0.0
 
 # Linting
 pylint>=2.15.0
+
+# Required to lint setup.py
+setuptools>=68.0.0

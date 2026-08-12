@@ -1,6 +1,5 @@
 """Tests for PhysAI Milestone 3: 1D Quantum Well (Schrödinger)."""
 
-import math
 from pathlib import Path
 
 import pytest
@@ -66,8 +65,6 @@ class TestQuantumWellDataset:
     def test_energy_scaling_law(self, quantum_well_path):
         """Verify E ∝ n² / L² relationship."""
         import pandas as pd
-        import numpy as np
-
         df = pd.read_csv(quantum_well_path)
 
         # Check that E * L² / n² is approximately constant

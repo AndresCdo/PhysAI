@@ -1,5 +1,7 @@
 """Module for generating physical equations using machine learning."""
-from transformers import GPT2LMHeadModel, GPT2Tokenizer
+# transformers is declared in no manifest; this legacy 2023 module is
+# slated for removal. See issue #14.
+from transformers import GPT2LMHeadModel, GPT2Tokenizer  # pylint: disable=import-error
 
 
 class EquationGenerator:

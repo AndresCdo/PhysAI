@@ -1,8 +1,8 @@
 """Tests for PhysAI Neuro-Symbolic Engine."""
 
-import pytest
-import math
 from pathlib import Path
+
+import pytest
 
 from physai.core.types import (
     Variable,
@@ -130,7 +130,7 @@ class TestParsing:
         assert len(params) == 0
 
     def test_is_valid_expression_balanced(self):
-        valid, error = is_valid_expression("a * Sqrt[x]")
+        valid, _ = is_valid_expression("a * Sqrt[x]")
         assert valid
 
     def test_is_valid_expression_unbalanced_brackets(self):
@@ -139,7 +139,7 @@ class TestParsing:
         assert "bracket" in error.lower()
 
     def test_is_valid_expression_empty(self):
-        valid, error = is_valid_expression("")
+        valid, _ = is_valid_expression("")
         assert not valid
 
     def test_expression_complexity(self):
@@ -336,7 +336,8 @@ class TestIntegration:
         from physai.core.wolfram_evaluator import WolframEvaluator
 
         with WolframEvaluator() as evaluator:
-            assert evaluator._session is not None
+            # Asserting on the live kernel session is the point of this test.
+            assert evaluator._session is not None  # pylint: disable=protected-access
 
     @pytest.mark.skip(reason="Requires Ollama server")
     def test_ollama_connection(self):

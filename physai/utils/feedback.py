@@ -166,14 +166,11 @@ def extract_wolfram_expression(llm_output: str) -> str:
         return ""
 
     bracket_depth = 0
-    start_idx = 0
     best_match = ""
     last_valid_end = 0
 
     for i, char in enumerate(cleaned):
         if char in "[{(":
-            if bracket_depth == 0:
-                start_idx = 0
             bracket_depth += 1
         elif char in "]})":
             bracket_depth = max(0, bracket_depth - 1)

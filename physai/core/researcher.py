@@ -1,9 +1,10 @@
 """Symbolic Researcher orchestrator for equation discovery."""
 
 import logging
-from dataclasses import dataclass, field
+import re
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict
 
 import pandas as pd
 
@@ -17,9 +18,6 @@ from physai.core.types import (
 from physai.core.llm_interface import OllamaInterface, OllamaInterfaceError
 from physai.core.wolfram_evaluator import (
     WolframEvaluator,
-    WolframEvaluatorError,
-    WolframSyntaxError,
-    WolframDimensionError,
     WolframFitError,
 )
 from physai.utils.feedback import generate_qualitative_feedback, generate_error_feedback
@@ -99,6 +97,10 @@ class SymbolicResearcher:
         self._history: List[Attempt] = []
         self._best_result: Optional[FitResult] = None
 
+    # Public entry point: every parameter is domain-meaningful and the loop
+    # is one coherent algorithm. Splitting it to satisfy a counter would
+    # scatter the discovery flow across helpers.
+    # pylint: disable=too-many-positional-arguments,too-many-locals,too-many-statements
     def discover(
         self,
         dataset_path: str,
@@ -146,8 +148,10 @@ class SymbolicResearcher:
         logger.info(f"Data shape: {data.shape}")
 
         try:
-            self.evaluator._ensure_connection()
-        except Exception as e:
+            # no public API to force a connection; tracked with the evaluator refactor
+            self.evaluator._ensure_connection()  # pylint: disable=protected-access
+        # foreign boundary: wolframclient surfaces undocumented types from a subprocess link
+        except Exception as e:  # pylint: disable=broad-exception-caught
             return DiscoveryResult(
                 success=False,
                 error_message=f"Failed to connect to Wolfram: {e}",
@@ -264,6 +268,9 @@ class SymbolicResearcher:
 
         return data
 
+    # Dispatch table: one return per physical quantity. See issue #12 for the
+    # ordering defect in this function.
+    # pylint: disable=too-many-return-statements
     def _infer_unit(self, variable_name: str) -> str:
         """Infer unit from variable name using common patterns."""
         name_lower = variable_name.lower()
@@ -310,15 +317,14 @@ class SymbolicResearcher:
     ) -> Optional[str]:
         """Generate a hypothesis from the LLM."""
         try:
-            feedback = None
+            # feedback is computed and never forwarded to generate_with_retry. See issue #13
+            feedback = None  # pylint: disable=unused-variable
             if self._history:
                 last_attempt = self._history[-1]
                 if (
                     last_attempt.adjusted_r2 is not None
                     and last_attempt.adjusted_r2 < 0.95
                 ):
-                    from physai.core.types import FitResult
-
                     mock_result = FitResult(
                         expression=last_attempt.expression,
                         parameters=last_attempt.parameters or {},
@@ -353,7 +359,8 @@ class SymbolicResearcher:
 
         try:
             return self.evaluator.syntax_check(expression)
-        except Exception as e:
+        # foreign boundary: wolframclient surfaces undocumented types from a subprocess link
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning(f"Wolfram syntax check failed, using local: {e}")
             return is_valid, error
 
@@ -361,8 +368,6 @@ class SymbolicResearcher:
         self, expression: str, input_variables: List[str]
     ) -> tuple:
         """Validate that expression uses the correct variable names."""
-        import re
-
         for var in input_variables:
             # Check if the exact variable name appears in the expression
             pattern = r"\b" + re.escape(var) + r"\b"
@@ -386,7 +391,8 @@ class SymbolicResearcher:
             return self.evaluator.is_dimensionally_sound(
                 expression=expression, target_unit=target.unit, input_units=input_units
             )
-        except Exception as e:
+        # FAILS OPEN: reports success on kernel error. See issue #12
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning(f"Dimension check failed: {e}")
             return True, ""
 
@@ -404,7 +410,8 @@ class SymbolicResearcher:
         except WolframFitError as e:
             logger.error(f"Fitting failed: {e}")
             return None
-        except Exception as e:
+        # foreign boundary: wolframclient surfaces undocumented types from a subprocess link
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(f"Unexpected fitting error: {e}")
             return None
 

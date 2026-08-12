@@ -74,10 +74,16 @@ class DataCollector:
                 print(f"Tarfile error processing {file_name}: {error}")
             except OSError as error:
                 print(f"OS error handling {file_name}: {error}")
-if __name__ == '__main__':
+def main():
+    """Collect documents for a default search query."""
     data_collector = DataCollector()
 
-    # Define your search query here (e.g., 'quantum mechanics AND general relativity')
-    search_query = 'quantum mechanics AND general relativity'
+    # Define your search query here
+    # (e.g., 'quantum mechanics AND general relativity')
+    query = 'quantum mechanics AND general relativity'
 
-    data_collector.collect_documents(search_query, max_results=100)
+    data_collector.collect_documents(query, max_results=100)
+
+
+if __name__ == '__main__':
+    main()
